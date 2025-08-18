@@ -55,9 +55,6 @@ export default function QuizScreen() {
                      animal.name.length > 0 && 
                      animal.image.length > 0;
       
-      if (!isValid && __DEV__) {
-        console.log('Invalid animal filtered out:', animal);
-      }
       return isValid;
     });
     
@@ -136,10 +133,7 @@ export default function QuizScreen() {
       
       questionList.push(question);
       
-      if (__DEV__) {
-        console.log(`Q${i + 1}: ${correctAnimal.name} at pos ${correctIndex}`);
-        console.log(`  Answers: ${shuffledAnswers.map(a => a.name).join(', ')}`);
-      }
+
     }
     
     if (questionList.length === 0) {
@@ -334,16 +328,7 @@ export default function QuizScreen() {
                             source={{ uri: getAnimalImage(animal.image) }}
                             style={styles.answerImage}
                             resizeMode="cover"
-                            onError={(error) => {
-                              if (__DEV__) {
-                                console.log(`Image load error for ${animal.name} (${Platform.OS}):`, error.nativeEvent?.error);
-                              }
-                            }}
-                            onLoad={() => {
-                              if (__DEV__) {
-                                console.log(`Image loaded: ${animal.name} (${Platform.OS})`);
-                              }
-                            }}
+
                           />
                         </View>
                       </TouchableOpacity>
@@ -379,16 +364,7 @@ export default function QuizScreen() {
                             source={{ uri: getAnimalImage(animal.image) }}
                             style={styles.answerImage}
                             resizeMode="cover"
-                            onError={(error) => {
-                              if (__DEV__) {
-                                console.log(`Image load error for ${animal.name} (${Platform.OS}):`, error.nativeEvent?.error);
-                              }
-                            }}
-                            onLoad={() => {
-                              if (__DEV__) {
-                                console.log(`Image loaded: ${animal.name} (${Platform.OS})`);
-                              }
-                            }}
+
                           />
                         </View>
                       </TouchableOpacity>

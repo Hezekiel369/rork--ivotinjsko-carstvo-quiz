@@ -22,11 +22,36 @@ const { width } = Dimensions.get("window");
 const cardWidth = (width - 48) / 2;
 
 export default function HomeScreen() {
-  const { unlockedCategories, categoryStars, backgroundGradient } = useGame();
+  const { unlockedCategories, categoryStars, backgroundGradient, isLoading } = useGame();
   
   useEffect(() => {
-    initializeAudio();
+    // Initialize audio with error handling
+    const setupAudio = async () => {
+      try {
+        await initializeAudio();
+      } catch (error) {
+        console.log('Audio initialization failed in HomeScreen:', error);
+      }
+    };
+    setupAudio();
   }, []);
+  
+  // Show loading state while game state is loading
+  if (isLoading) {
+    return (
+      <LinearGradient
+        colors={["#1B5E20", "#FFEB3B"]}
+        style={styles.container}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Učitavanje...</Text>
+            <Text style={styles.loadingSubText}>Platform: {Platform.OS}</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
 
   const handleCategoryPress = async (categoryId: number) => {
     const isAndroid = Platform.OS === ('android' as any);
@@ -398,5 +423,24 @@ const styles = StyleSheet.create({
     color: "#FFD700",
     fontSize: 12,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFF",
+    textShadowColor: "#000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  loadingSubText: {
+    fontSize: 16,
+    color: "#FFF",
+    opacity: 0.8,
+    marginTop: 10,
   },
 });

@@ -31,53 +31,22 @@ export const [GameProvider, useGame] = createContextHook(() => {
     try {
       console.log('Loading game state for platform:', Platform.OS);
       
-      // Android-specific AsyncStorage handling with multiple fallback strategies
+      // Simplified Android approach to avoid remote update conflicts
       let stored: string | null = null;
       const isAndroid = Platform.OS === ('android' as any);
       
       if (isAndroid) {
-        // Android-specific loading with extended timeout and retries
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (retryCount < maxRetries && stored === null) {
-          try {
-            console.log(`Android AsyncStorage attempt ${retryCount + 1}/${maxRetries}`);
-            
-            const loadPromise = AsyncStorage.getItem("gameState");
-            const timeoutPromise = new Promise<string | null>((_, reject) => 
-              setTimeout(() => reject(new Error('AsyncStorage timeout')), 5000 + (retryCount * 2000))
-            );
-            
-            stored = await Promise.race([loadPromise, timeoutPromise]);
-            
-            if (stored !== null) {
-              console.log('Android AsyncStorage success on attempt', retryCount + 1);
-              break;
-            }
-          } catch (attemptError) {
-            console.log(`Android AsyncStorage attempt ${retryCount + 1} failed:`, attemptError);
-            retryCount++;
-            
-            if (retryCount < maxRetries) {
-              // Wait before retry with exponential backoff
-              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-            }
-          }
-        }
-        
-        // Final fallback for Android
-        if (stored === null && retryCount >= maxRetries) {
-          console.log('All Android AsyncStorage attempts failed, trying direct access...');
-          try {
-            stored = await AsyncStorage.getItem("gameState");
-          } catch (directError) {
-            console.log('Android direct AsyncStorage access failed:', directError);
-            stored = null;
-          }
+        // For Android, use very simple approach to avoid conflicts with remote updates
+        try {
+          console.log('Android - attempting simple AsyncStorage access');
+          stored = await AsyncStorage.getItem("gameState");
+          console.log('Android AsyncStorage access completed');
+        } catch (androidError) {
+          console.log('Android AsyncStorage failed, using default state:', androidError);
+          stored = null;
         }
       } else {
-        // Non-Android platforms (iOS, web) - simpler approach
+        // Non-Android platforms (iOS, web) - with timeout
         try {
           const loadPromise = AsyncStorage.getItem("gameState");
           const timeoutPromise = new Promise<string | null>((_, reject) => 
@@ -151,51 +120,35 @@ export const [GameProvider, useGame] = createContextHook(() => {
         backgroundGradient: ["#1B5E20", "#FFEB3B"] as const // Ensure correct gradient
       };
       
-      if (isAndroid) {
-        // Android-specific saving with retries
-        let saveSuccess = false;
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (!saveSuccess && retryCount < maxRetries) {
-          try {
-            console.log(`Android save attempt ${retryCount + 1}/${maxRetries}`);
-            
-            const savePromise = AsyncStorage.setItem("gameState", JSON.stringify(stateToSave));
-            const timeoutPromise = new Promise<void>((_, reject) => 
-              setTimeout(() => reject(new Error('Save timeout')), 5000)
-            );
-            
-            await Promise.race([savePromise, timeoutPromise]);
-            saveSuccess = true;
-            console.log('Android save successful on attempt', retryCount + 1);
-          } catch (saveError) {
-            console.log(`Android save attempt ${retryCount + 1} failed:`, saveError);
-            retryCount++;
-            
-            if (retryCount < maxRetries) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-            }
-          }
-        }
-        
-        if (!saveSuccess) {
-          console.error('All Android save attempts failed');
-          // Still update local state even if save failed
-          setGameState(stateToSave);
-          return;
-        }
-      } else {
-        // Non-Android platforms
-        await AsyncStorage.setItem("gameState", JSON.stringify(stateToSave));
-      }
-      
-      // Update local state only after successful save
+      // Update local state first for immediate UI response
       setGameState(stateToSave);
-      console.log('Game state saved and updated successfully');
+      
+      if (isAndroid) {
+        // For Android, use fire-and-forget approach to avoid blocking UI
+        AsyncStorage.setItem("gameState", JSON.stringify(stateToSave))
+          .then(() => {
+            console.log('Android save completed successfully');
+          })
+          .catch((saveError) => {
+            console.log('Android save failed (UI already updated):', saveError);
+          });
+      } else {
+        // Non-Android platforms - still use await but with timeout
+        try {
+          const savePromise = AsyncStorage.setItem("gameState", JSON.stringify(stateToSave));
+          const timeoutPromise = new Promise<void>((_, reject) => 
+            setTimeout(() => reject(new Error('Save timeout')), 2000)
+          );
+          
+          await Promise.race([savePromise, timeoutPromise]);
+          console.log('Non-Android save completed successfully');
+        } catch (saveError) {
+          console.log('Non-Android save failed (UI already updated):', saveError);
+        }
+      }
     } catch (error) {
       console.error("Critical error saving game state:", error);
-      // Update local state anyway to prevent UI inconsistency
+      // Still update local state for UI consistency
       setGameState(newState);
     }
   };

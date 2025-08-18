@@ -77,10 +77,15 @@ class AndroidErrorBoundary extends Component<
 }
 
 // Prevent auto-hide with better Android error handling
-try {
-  SplashScreen.preventAutoHideAsync();
-} catch (error) {
-  console.log('SplashScreen preventAutoHideAsync failed:', error);
+if (Platform.OS !== 'android') {
+  try {
+    SplashScreen.preventAutoHideAsync();
+  } catch (error) {
+    console.log('SplashScreen preventAutoHideAsync failed:', error);
+  }
+} else {
+  // For Android, use simpler approach to avoid remote update issues
+  console.log('Android detected - skipping splash screen prevention');
 }
 
 // Optimized QueryClient for Android with better error handling
@@ -144,12 +149,16 @@ export default function RootLayout() {
         }
         
         // Improved splash screen handling with progressive delays for Android
-        const hideDelay = isAndroid ? 2000 : 500;
+        const hideDelay = isAndroid ? 1000 : 500;
         
         setTimeout(async () => {
           try {
-            await SplashScreen.hideAsync();
-            console.log('Splash screen hidden successfully');
+            if (Platform.OS !== 'android') {
+              await SplashScreen.hideAsync();
+              console.log('Splash screen hidden successfully');
+            } else {
+              console.log('Android - splash screen handling skipped for stability');
+            }
           } catch (splashError) {
             console.log('Splash screen hide failed (continuing):', splashError);
             // Don't throw error, just continue
@@ -159,11 +168,13 @@ export default function RootLayout() {
       } catch (error) {
         console.error('App initialization failed (continuing):', error);
         // Fallback: still try to hide splash screen after longer delay
-        setTimeout(() => {
-          SplashScreen.hideAsync().catch((fallbackError) => {
-            console.log('Fallback splash screen hide also failed:', fallbackError);
-          });
-        }, 3000);
+        if (Platform.OS !== 'android') {
+          setTimeout(() => {
+            SplashScreen.hideAsync().catch((fallbackError) => {
+              console.log('Fallback splash screen hide also failed:', fallbackError);
+            });
+          }, 3000);
+        }
       }
     };
     

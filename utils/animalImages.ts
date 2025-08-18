@@ -20,9 +20,6 @@ const imageCache = new Map<string, string>();
 export function getAnimalImage(imageUrl: string): string {
   // Input validation for Android compatibility
   if (!imageUrl || typeof imageUrl !== 'string') {
-    if (__DEV__) {
-      console.log('Invalid image URL provided, using fallback');
-    }
     return animalImageMap.fallback;
   }
   
@@ -38,10 +35,10 @@ export function getAnimalImage(imageUrl: string): string {
     // If it's already a full URL (from categories.ts), optimize for Android
     if (imageUrl.startsWith('http')) {
       if (isAndroid) {
-        // For Android, modify URLs to use smaller, more compressed images
+        // For Android, use even smaller images to reduce memory usage
         if (imageUrl.includes('unsplash.com')) {
-          // Reduce image size and quality for Android performance
-          finalUrl = imageUrl.replace(/w=\d+/, 'w=120').replace(/h=\d+/, 'h=120').replace(/q=\d+/, 'q=40');
+          // Very small images for Android to prevent memory issues
+          finalUrl = imageUrl.replace(/w=\d+/, 'w=80').replace(/h=\d+/, 'h=80').replace(/q=\d+/, 'q=30');
         } else if (imageUrl.includes('r2.dev')) {
           // R2 images are already optimized, use as-is
           finalUrl = imageUrl;
@@ -64,16 +61,8 @@ export function getAnimalImage(imageUrl: string): string {
     // Add to cache for faster subsequent loads
     imageCache.set(imageUrl, finalUrl);
     
-    // Only log in development for performance
-    if (__DEV__ && !imageCache.has(imageUrl)) {
-      console.log(`Image processed (${Platform.OS}):`, imageUrl.substring(0, 30), '-> cached');
-    }
-    
     return finalUrl;
-  } catch (error) {
-    if (__DEV__) {
-      console.log('Error processing image URL:', error);
-    }
+  } catch {
     return animalImageMap.fallback;
   }
 }
@@ -94,28 +83,27 @@ export async function initializeAudio(): Promise<void> {
   try {
     console.log('Initializing audio for platform:', Platform.OS);
     
-    // Set audio mode with Android-optimized settings
+    // For Android, completely skip audio to avoid remote update conflicts
+    if (isAndroid) {
+      console.log('Android detected - audio completely disabled for stability');
+      applauseSound = null;
+      sighSound = null;
+      console.log('Audio initialization skipped for Android');
+      return;
+    }
+    
+    // Set audio mode only for non-Android platforms
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
         playsInSilentModeIOS: true,
-        shouldDuckAndroid: isAndroid,
+        shouldDuckAndroid: false,
         playThroughEarpieceAndroid: false,
       });
       console.log('Audio mode set successfully');
     } catch (audioModeError) {
       console.log('Audio mode setup failed (continuing):', audioModeError);
-    }
-    
-    // For Android, use simpler approach - skip audio loading if it causes issues
-    if (isAndroid) {
-      console.log('Android detected - using simplified audio approach');
-      // Don't load audio files on Android to prevent crashes
-      applauseSound = null;
-      sighSound = null;
-      console.log('Audio initialization completed for Android (audio disabled for stability)');
-      return;
     }
     
     // Non-Android platforms can use audio
