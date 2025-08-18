@@ -76,6 +76,9 @@ export default function HomeScreen() {
       case 4: // Morske životinje - use whale (KIT)
         categoryAnimal = category.animals.find(a => a.name === "KIT") || category.animals[0];
         break;
+      case 5: // Insekti - use hornet (STRŠLJEN)
+        categoryAnimal = category.animals.find(a => a.name === "STRŠLJEN") || category.animals[0];
+        break;
       default:
         categoryAnimal = category.animals[0];
     }

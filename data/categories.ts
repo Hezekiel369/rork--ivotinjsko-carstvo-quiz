@@ -109,7 +109,7 @@ export const categories: Category[] = [
   {
     id: 5,
     name: "Insekti",
-    emoji: "🐞",
+    emoji: "🐝",
     animals: [
       { id: 53, name: "BOGOMOLJKA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/tgmhl71vvgohvfii6taun" },
       { id: 54, name: "BUBAMARA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/g4lcvlybvydldibk5l9ua" },

@@ -77,17 +77,16 @@ export async function initializeAudio(): Promise<void> {
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       playThroughEarpieceAndroid: false,
-      // Removed interruption mode settings for compatibility
     });
     
-    // Load applause sound with timeout for Android
+    // Load applause sound with shorter timeout for better Android performance
     const loadApplausePromise = Audio.Sound.createAsync(
       { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },
-      { shouldPlay: false, volume: 0.7 }
+      { shouldPlay: false, volume: 0.7, isLooping: false }
     );
     
     const applauseTimeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Applause sound load timeout')), 5000)
+      setTimeout(() => reject(new Error('Applause sound load timeout')), 3000)
     );
     
     try {
@@ -96,16 +95,17 @@ export async function initializeAudio(): Promise<void> {
       console.log('Applause sound loaded successfully');
     } catch (error) {
       console.log('Failed to load applause sound (using fallback):', error);
+      applauseSound = null;
     }
     
-    // Load sigh sound with timeout for Android
+    // Load sigh sound with shorter timeout for better Android performance
     const loadSighPromise = Audio.Sound.createAsync(
       { uri: 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg' },
-      { shouldPlay: false, volume: 0.5 }
+      { shouldPlay: false, volume: 0.5, isLooping: false }
     );
     
     const sighTimeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Sigh sound load timeout')), 5000)
+      setTimeout(() => reject(new Error('Sigh sound load timeout')), 3000)
     );
     
     try {
@@ -114,11 +114,14 @@ export async function initializeAudio(): Promise<void> {
       console.log('Sigh sound loaded successfully');
     } catch (error) {
       console.log('Failed to load sigh sound (using fallback):', error);
+      sighSound = null;
     }
     
     console.log('Audio initialization completed');
   } catch (error) {
     console.log('Audio initialization failed (continuing without audio):', error);
+    applauseSound = null;
+    sighSound = null;
   }
 }
 
@@ -172,7 +175,7 @@ export function preloadImages(imageUrls: string[]): void {
       try {
         const img = new Image();
         img.src = getAnimalImage(url);
-      } catch (error) {
+      } catch {
         console.log('Failed to preload image on web:', url);
       }
     });
@@ -195,7 +198,7 @@ export function preloadImages(imageUrls: string[]): void {
             // Silently fail for prefetch errors
           });
         }
-      } catch (error) {
+      } catch {
         // Silently continue if prefetch fails
       }
     });

@@ -15,7 +15,7 @@ const defaultState: GameState = {
   categoryStars: {},
   totalAttempts: 0,
   correctAnswers: 0,
-  backgroundGradient: ["#1B5E20", "#FFEB3B"] as const,
+  backgroundGradient: ["#1B5E20", "#FFF59D"] as const,
 };
 
 export const [GameProvider, useGame] = createContextHook(() => {
@@ -29,15 +29,35 @@ export const [GameProvider, useGame] = createContextHook(() => {
   const loadGameState = async () => {
     try {
       console.log('Loading game state...');
-      const stored = await AsyncStorage.getItem("gameState");
+      
+      // Add timeout for Android compatibility
+      const loadPromise = AsyncStorage.getItem("gameState");
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AsyncStorage timeout')), 5000)
+      );
+      
+      const stored = await Promise.race([loadPromise, timeoutPromise]) as string | null;
+      
       if (stored) {
         const parsedState = JSON.parse(stored);
         console.log('Loaded game state:', parsedState);
-        // Ensure the loaded state has the correct background gradient format
-        if (parsedState.backgroundGradient && Array.isArray(parsedState.backgroundGradient)) {
-          setGameState(parsedState);
+        
+        // Validate the loaded state structure
+        if (parsedState && 
+            typeof parsedState.unlockedCategories === 'number' &&
+            parsedState.backgroundGradient && 
+            Array.isArray(parsedState.backgroundGradient) &&
+            parsedState.backgroundGradient.length >= 2) {
+          // Ensure background gradient uses the new lighter yellow
+          const updatedState = {
+            ...parsedState,
+            backgroundGradient: parsedState.backgroundGradient[1] === '#FFEB3B' 
+              ? ["#1B5E20", "#FFF59D"] as const
+              : parsedState.backgroundGradient
+          };
+          setGameState(updatedState);
         } else {
-          console.log('Invalid stored state, using default');
+          console.log('Invalid stored state structure, using default');
           setGameState(defaultState);
         }
       } else {

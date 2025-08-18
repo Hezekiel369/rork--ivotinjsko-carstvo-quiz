@@ -50,22 +50,45 @@ export default function QuizScreen() {
     
     // Ensure we have enough animals for proper quiz generation
     const availableAnimals = [...category.animals];
-    const shuffled = availableAnimals.sort(() => Math.random() - 0.5);
-    const questionList = shuffled.slice(0, Math.min(10, availableAnimals.length)).map((correctAnimal, questionIndex) => {
+    
+    // Validate all animals have valid images
+    const validAnimals = availableAnimals.filter(animal => {
+      return animal.image && animal.image.length > 0;
+    });
+    
+    if (validAnimals.length < 4) {
+      console.error('Not enough valid animals with images:', validAnimals.length);
+      return;
+    }
+    
+    const shuffled = validAnimals.sort(() => Math.random() - 0.5);
+    const questionList = shuffled.slice(0, Math.min(10, validAnimals.length)).map((correctAnimal, questionIndex) => {
       // Get wrong answers, ensuring we always have exactly 3
-      const wrongAnswers = availableAnimals
+      const wrongAnswers = validAnimals
         .filter(a => a.id !== correctAnimal.id)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
       
       // Safety check: ensure we have exactly 3 wrong answers
-      while (wrongAnswers.length < 3 && availableAnimals.length > 1) {
-        const randomAnimal = availableAnimals[Math.floor(Math.random() * availableAnimals.length)];
+      while (wrongAnswers.length < 3 && validAnimals.length > 1) {
+        const randomAnimal = validAnimals[Math.floor(Math.random() * validAnimals.length)];
         if (randomAnimal.id !== correctAnimal.id && !wrongAnswers.find(a => a.id === randomAnimal.id)) {
           wrongAnswers.push(randomAnimal);
         }
         // Prevent infinite loop
-        if (wrongAnswers.length >= availableAnimals.length - 1) break;
+        if (wrongAnswers.length >= validAnimals.length - 1) break;
+      }
+      
+      // Ensure we have exactly 4 answers
+      if (wrongAnswers.length < 3) {
+        console.warn(`Question ${questionIndex + 1}: Only ${wrongAnswers.length + 1} answers available`);
+        // Duplicate some animals if necessary to ensure 4 answers
+        while (wrongAnswers.length < 3) {
+          const duplicateAnimal = validAnimals[wrongAnswers.length % validAnimals.length];
+          if (duplicateAnimal.id !== correctAnimal.id) {
+            wrongAnswers.push(duplicateAnimal);
+          }
+        }
       }
       
       // Create exactly 4 answers: 1 correct + 3 wrong
@@ -76,6 +99,11 @@ export default function QuizScreen() {
       
       // Find the correct answer's new position after shuffling
       const correctIndex = shuffledAnswers.findIndex(a => a.id === correctAnimal.id);
+      
+      // Validate we have exactly 4 answers
+      if (shuffledAnswers.length !== 4) {
+        console.error(`Question ${questionIndex + 1}: Expected 4 answers, got ${shuffledAnswers.length}`);
+      }
       
       if (__DEV__) {
         console.log(`Question ${questionIndex + 1}: ${correctAnimal.name} at position ${correctIndex}, answers:`, shuffledAnswers.map(a => a.name));
