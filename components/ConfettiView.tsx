@@ -12,11 +12,15 @@ interface ConfettiPiece {
 
 export default function ConfettiView() {
   const confettiPieces = useRef<ConfettiPiece[]>([]);
+  const animationsRef = useRef<Animated.CompositeAnimation[]>([]);
 
   useEffect(() => {
     const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"];
     
-    for (let i = 0; i < 30; i++) {
+    confettiPieces.current = [];
+    animationsRef.current = [];
+    
+    for (let i = 0; i < 20; i++) {
       const piece: ConfettiPiece = {
         x: new Animated.Value(Math.random() * width),
         y: new Animated.Value(-50),
@@ -26,19 +30,30 @@ export default function ConfettiView() {
       
       confettiPieces.current.push(piece);
       
-      Animated.parallel([
+      const animation = Animated.parallel([
         Animated.timing(piece.y, {
           toValue: height + 50,
-          duration: 3000 + Math.random() * 2000,
+          duration: 2500 + Math.random() * 1000,
           useNativeDriver: true,
         }),
         Animated.timing(piece.rotate, {
           toValue: 360 * (Math.random() > 0.5 ? 1 : -1),
-          duration: 3000 + Math.random() * 2000,
+          duration: 2500 + Math.random() * 1000,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]);
+      
+      animationsRef.current.push(animation);
+      animation.start();
     }
+    
+    return () => {
+      animationsRef.current.forEach(animation => {
+        animation.stop();
+      });
+      confettiPieces.current = [];
+      animationsRef.current = [];
+    };
   }, []);
 
   return (

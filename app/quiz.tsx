@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -35,15 +35,10 @@ export default function QuizScreen() {
 
   const category = categories.find(c => c.id === parseInt(categoryId as string));
 
-  useEffect(() => {
-    if (category) {
-      generateQuestions();
-    }
-  }, [category]);
-
-  const generateQuestions = () => {
+  const generateQuestions = useCallback(() => {
     if (!category) return;
     
+    console.log('Generating questions for category:', category.name);
     const shuffled = [...category.animals].sort(() => Math.random() - 0.5);
     const questionList = shuffled.slice(0, 10).map(correctAnimal => {
       const wrongAnswers = category.animals
@@ -61,10 +56,18 @@ export default function QuizScreen() {
     });
     
     setQuestions(questionList);
-  };
+  }, [category]);
 
-  const handleAnswer = async (answerIndex: number) => {
+  useEffect(() => {
+    if (category) {
+      generateQuestions();
+    }
+  }, [category, generateQuestions]);
+
+  const handleAnswer = useCallback(async (answerIndex: number) => {
     if (showFeedback) return;
+    
+    console.log('Answer selected:', answerIndex, 'Correct index:', questions[currentQuestion]?.correctIndex);
     
     if (Platform.OS !== "web") {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -78,7 +81,7 @@ export default function QuizScreen() {
     if (correct) {
       setCorrectAnswers(prev => prev + 1);
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+      setTimeout(() => setShowConfetti(false), 2500);
     }
     
     Animated.timing(fadeAnim, {
@@ -99,19 +102,20 @@ export default function QuizScreen() {
           setShowFeedback(false);
         });
       } else {
-        const stars = correctAnswers + (correct ? 1 : 0);
-        completeCategory(category!.id, stars);
+        const finalCorrectCount = correctAnswers + (correct ? 1 : 0);
+        console.log('Quiz completed. Final score:', finalCorrectCount);
+        completeCategory(category!.id, finalCorrectCount);
         router.replace({
           pathname: "/level-complete",
           params: { 
             categoryId: categoryId as string,
-            stars: stars.toString(),
-            correctAnswers: (correctAnswers + (correct ? 1 : 0)).toString()
+            stars: finalCorrectCount.toString(),
+            correctAnswers: finalCorrectCount.toString()
           }
         });
       }
     }, 2000);
-  };
+  }, [showFeedback, questions, currentQuestion, correctAnswers, completeCategory, category, categoryId, fadeAnim]);
 
   if (!category || questions.length === 0) {
     return (

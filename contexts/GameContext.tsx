@@ -49,7 +49,7 @@ export const [GameProvider, useGame] = createContextHook(() => {
   };
 
   const completeCategory = useCallback((categoryId: number, correctCount: number) => {
-    const stars = correctCount === 0 ? 0 : correctCount === 1 ? 1 : correctCount <= 9 ? 2 : 3;
+    const stars = correctCount === 10 ? 3 : correctCount >= 2 ? 2 : correctCount === 1 ? 1 : 0;
     
     const newState = {
       ...gameState,

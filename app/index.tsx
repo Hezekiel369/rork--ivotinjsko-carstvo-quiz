@@ -135,16 +135,20 @@ export default function HomeScreen() {
             onPress={() => router.push("/statistics")}
             testID="statistics-button"
           >
-            <ChartBar size={24} color="#FFF" />
-            <Text style={styles.bottomButtonText}>Statistika</Text>
+            <View style={styles.buttonBackground}>
+              <ChartBar size={24} color="#FFF" />
+              <Text style={styles.bottomButtonText}>Statistika</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => router.push("/settings")}
             testID="settings-button"
           >
-            <Settings size={24} color="#FFF" />
-            <Text style={styles.bottomButtonText}>Podešavanja</Text>
+            <View style={styles.buttonBackground}>
+              <Settings size={24} color="#FFF" />
+              <Text style={styles.bottomButtonText}>Podešavanja</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -258,9 +262,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
   },
   bottomButton: {
+    borderRadius: 25,
+  },
+  buttonBackground: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,

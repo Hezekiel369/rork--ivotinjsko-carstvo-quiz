@@ -27,13 +27,13 @@ export default function LevelCompleteScreen() {
     if (Platform.OS !== "web" && stars > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-  }, []);
+  }, [stars]);
 
   const getStarCount = () => {
-    if (stars === 0) return 0;
+    if (stars === 10) return 3;
+    if (stars >= 2) return 2;
     if (stars === 1) return 1;
-    if (stars >= 2 && stars <= 9) return 2;
-    return 3;
+    return 0;
   };
 
   const starCount = getStarCount();
