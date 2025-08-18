@@ -15,7 +15,7 @@ const defaultState: GameState = {
   categoryStars: {},
   totalAttempts: 0,
   correctAnswers: 0,
-  backgroundGradient: ["#1B5E20", "#FFEB3B"] as const,
+  backgroundGradient: ["#2E7D32", "#FFEB3B"] as const,
 };
 
 export const [GameProvider, useGame] = createContextHook(() => {
@@ -28,12 +28,25 @@ export const [GameProvider, useGame] = createContextHook(() => {
 
   const loadGameState = async () => {
     try {
+      console.log('Loading game state...');
       const stored = await AsyncStorage.getItem("gameState");
       if (stored) {
-        setGameState(JSON.parse(stored));
+        const parsedState = JSON.parse(stored);
+        console.log('Loaded game state:', parsedState);
+        // Ensure the loaded state has the correct background gradient format
+        if (parsedState.backgroundGradient && Array.isArray(parsedState.backgroundGradient)) {
+          setGameState(parsedState);
+        } else {
+          console.log('Invalid stored state, using default');
+          setGameState(defaultState);
+        }
+      } else {
+        console.log('No stored state found, using default');
+        setGameState(defaultState);
       }
     } catch (error) {
       console.error("Error loading game state:", error);
+      setGameState(defaultState);
     } finally {
       setIsLoading(false);
     }
@@ -41,10 +54,12 @@ export const [GameProvider, useGame] = createContextHook(() => {
 
   const saveGameState = async (newState: GameState) => {
     try {
+      console.log('Saving game state:', newState);
       await AsyncStorage.setItem("gameState", JSON.stringify(newState));
       setGameState(newState);
     } catch (error) {
       console.error("Error saving game state:", error);
+      // Don't update state if save failed
     }
   };
 

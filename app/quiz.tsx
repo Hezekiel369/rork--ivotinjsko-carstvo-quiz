@@ -15,7 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useGame } from "@/contexts/GameContext";
 import { categories } from "@/data/categories";
-import { getAnimalImage } from "@/utils/animalImages";
+import { getAnimalImage, preloadImages } from "@/utils/animalImages";
 import * as Haptics from "expo-haptics";
 import ConfettiView from "@/components/ConfettiView";
 
@@ -36,17 +36,32 @@ export default function QuizScreen() {
   const category = categories.find(c => c.id === parseInt(categoryId as string));
 
   const generateQuestions = useCallback(() => {
-    if (!category) return;
+    if (!category) {
+      console.log('No category found');
+      return;
+    }
     
-    console.log('Generating questions for category:', category.name);
+    console.log('Generating questions for category:', category.name, 'with', category.animals.length, 'animals');
+    
+    if (category.animals.length < 4) {
+      console.error('Category has less than 4 animals, cannot generate proper quiz');
+      return;
+    }
+    
     const shuffled = [...category.animals].sort(() => Math.random() - 0.5);
-    const questionList = shuffled.slice(0, 10).map(correctAnimal => {
+    const questionList = shuffled.slice(0, 10).map((correctAnimal, questionIndex) => {
       const wrongAnswers = category.animals
         .filter(a => a.id !== correctAnimal.id)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
       
+      if (wrongAnswers.length < 3) {
+        console.error('Not enough wrong answers for question', questionIndex);
+      }
+      
       const allAnswers = [correctAnimal, ...wrongAnswers].sort(() => Math.random() - 0.5);
+      
+      console.log(`Question ${questionIndex + 1}: Correct answer is ${correctAnimal.name}, all answers:`, allAnswers.map(a => a.name));
       
       return {
         correctAnimal,
@@ -55,7 +70,12 @@ export default function QuizScreen() {
       };
     });
     
+    // Preload all images for better performance
+    const allImages = questionList.flatMap(q => q.answers.map(a => a.image));
+    preloadImages(allImages);
+    
     setQuestions(questionList);
+    console.log('Generated', questionList.length, 'questions. First question has', questionList[0]?.answers?.length, 'answers');
   }, [category]);
 
   useEffect(() => {
@@ -117,7 +137,17 @@ export default function QuizScreen() {
     }, 2000);
   }, [showFeedback, questions, currentQuestion, correctAnswers, completeCategory, category, categoryId, fadeAnim]);
 
-  if (!category || questions.length === 0) {
+  if (!category) {
+    return (
+      <LinearGradient colors={backgroundGradient} style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <Text style={styles.errorText}>Kategorija nije pronađena</Text>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+  
+  if (questions.length === 0) {
     return (
       <LinearGradient colors={backgroundGradient} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
@@ -153,26 +183,65 @@ export default function QuizScreen() {
           </View>
 
           <View style={styles.answersGrid}>
-            {question.answers.map((animal: any, index: number) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.answerCard,
-                  selectedAnswer === index && styles.selectedCard,
-                  showFeedback && index === question.correctIndex && styles.correctCard,
-                  showFeedback && selectedAnswer === index && !isCorrect && styles.wrongCard,
-                ]}
-                onPress={() => handleAnswer(index)}
-                disabled={showFeedback}
-                testID={`answer-${index}`}
-              >
-                <Image
-                  source={{ uri: getAnimalImage(animal.image) }}
-                  style={styles.answerImage}
-                  resizeMode="cover"
-                />
-              </TouchableOpacity>
-            ))}
+            {question.answers && question.answers.length >= 4 ? (
+              <>
+                {/* First row */}
+                <View style={styles.answerRow}>
+                  {question.answers.slice(0, 2).map((animal: any, index: number) => (
+                    <TouchableOpacity
+                      key={`${animal.id}-${index}`}
+                      style={[
+                        styles.answerCard,
+                        selectedAnswer === index && styles.selectedCard,
+                        showFeedback && index === question.correctIndex && styles.correctCard,
+                        showFeedback && selectedAnswer === index && !isCorrect && styles.wrongCard,
+                      ]}
+                      onPress={() => handleAnswer(index)}
+                      disabled={showFeedback}
+                      testID={`answer-${index}`}
+                    >
+                      <Image
+                        source={{ uri: getAnimalImage(animal.image) }}
+                        style={styles.answerImage}
+                        resizeMode="cover"
+                        onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
+                        onLoad={() => console.log('Image loaded successfully:', animal.name)}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {/* Second row */}
+                <View style={styles.answerRow}>
+                  {question.answers.slice(2, 4).map((animal: any, index: number) => {
+                    const actualIndex = index + 2;
+                    return (
+                      <TouchableOpacity
+                        key={`${animal.id}-${actualIndex}`}
+                        style={[
+                          styles.answerCard,
+                          selectedAnswer === actualIndex && styles.selectedCard,
+                          showFeedback && actualIndex === question.correctIndex && styles.correctCard,
+                          showFeedback && selectedAnswer === actualIndex && !isCorrect && styles.wrongCard,
+                        ]}
+                        onPress={() => handleAnswer(actualIndex)}
+                        disabled={showFeedback}
+                        testID={`answer-${actualIndex}`}
+                      >
+                        <Image
+                          source={{ uri: getAnimalImage(animal.image) }}
+                          style={styles.answerImage}
+                          resizeMode="cover"
+                          onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
+                          onLoad={() => console.log('Image loaded successfully:', animal.name)}
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+            ) : (
+              <Text style={styles.errorText}>Greška u učitavanju pitanja (ima {question.answers?.length || 0} odgovora)</Text>
+            )}
           </View>
 
           {showFeedback && (
@@ -268,19 +337,24 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   answersGrid: {
+    paddingHorizontal: 8,
+  },
+  answerRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     justifyContent: "space-between",
+    marginBottom: 16,
   },
   answerCard: {
-    width: (width - 48) / 2,
-    height: (width - 48) / 2,
+    width: (width - 64) / 2,
+    height: (width - 64) / 2,
     backgroundColor: "#2E7D32",
     borderRadius: 16,
-    marginBottom: 16,
     overflow: "hidden",
     borderWidth: 3,
     borderColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
   },
   selectedCard: {
     borderColor: "#FFD700",
@@ -294,8 +368,10 @@ const styles = StyleSheet.create({
     borderWidth: 4,
   },
   answerImage: {
-    width: "100%",
-    height: "100%",
+    width: "85%",
+    height: "85%",
+    borderRadius: 1000,
+    backgroundColor: "#4CAF50",
   },
   feedbackContainer: {
     position: "absolute",
@@ -344,5 +420,11 @@ const styles = StyleSheet.create({
     color: "#FFF",
     textAlign: "center",
     marginTop: 100,
+  },
+  errorText: {
+    fontSize: 18,
+    color: "#FFF",
+    textAlign: "center",
+    marginTop: 50,
   },
 });
