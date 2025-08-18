@@ -79,6 +79,21 @@ export default function HomeScreen() {
       case 5: // Insekti - use hornet (STRŠLJEN)
         categoryAnimal = category.animals.find(a => a.name === "STRŠLJEN") || category.animals[0];
         break;
+      case 6: // Kišna šuma - use bear (MEDVED)
+        categoryAnimal = category.animals.find(a => a.name === "MEDVED") || category.animals[0];
+        break;
+      case 7: // Savana - use ostrich (NOJ)
+        categoryAnimal = category.animals.find(a => a.name === "NOJ") || category.animals[0];
+        break;
+      case 8: // Australija - use kangaroo (KENGUR)
+        categoryAnimal = category.animals.find(a => a.name === "KENGUR") || category.animals[0];
+        break;
+      case 9: // Okean - use whale (KIT)
+        categoryAnimal = category.animals.find(a => a.name === "KIT") || category.animals[0];
+        break;
+      case 10: // Prerija - use wolf (VUK)
+        categoryAnimal = category.animals.find(a => a.name === "VUK") || category.animals[0];
+        break;
       default:
         categoryAnimal = category.animals[0];
     }

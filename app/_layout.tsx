@@ -24,19 +24,46 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    // Android-specific optimizations
-    if (Platform.OS === 'android') {
-      // Set status bar style for better Android compatibility
-      StatusBar.setBarStyle('light-content', true);
-      StatusBar.setBackgroundColor('#1B5E20', true);
-    }
+    const initializeApp = async () => {
+      try {
+        console.log('Initializing app for platform:', Platform.OS);
+        
+        // Android-specific optimizations with better error handling
+        if (Platform.OS === 'android') {
+          try {
+            // Set status bar style for better Android compatibility
+            StatusBar.setBarStyle('light-content', true);
+            StatusBar.setBackgroundColor('#1B5E20', true);
+            console.log('Android status bar configured');
+          } catch (statusError) {
+            console.log('Status bar configuration failed:', statusError);
+          }
+        }
+        
+        // Improved splash screen handling with better Android support
+        const hideDelay = Platform.OS === 'android' ? 1000 : 300;
+        
+        setTimeout(async () => {
+          try {
+            await SplashScreen.hideAsync();
+            console.log('Splash screen hidden successfully');
+          } catch (splashError) {
+            console.log('Splash screen hide failed:', splashError);
+          }
+        }, hideDelay);
+        
+      } catch (error) {
+        console.error('App initialization failed:', error);
+        // Fallback: still try to hide splash screen
+        setTimeout(() => {
+          SplashScreen.hideAsync().catch(() => {
+            console.log('Fallback splash screen hide also failed');
+          });
+        }, 1500);
+      }
+    };
     
-    // Hide splash screen after a short delay to ensure proper loading
-    const timer = setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, Platform.OS === 'android' ? 500 : 100);
-    
-    return () => clearTimeout(timer);
+    initializeApp();
   }, []);
 
   return (

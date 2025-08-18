@@ -15,7 +15,7 @@ const defaultState: GameState = {
   categoryStars: {},
   totalAttempts: 0,
   correctAnswers: 0,
-  backgroundGradient: ["#1B5E20", "#FFF59D"] as const,
+  backgroundGradient: ["#1B5E20", "#FFEB3B"] as const,
 };
 
 export const [GameProvider, useGame] = createContextHook(() => {
@@ -30,13 +30,25 @@ export const [GameProvider, useGame] = createContextHook(() => {
     try {
       console.log('Loading game state...');
       
-      // Add timeout for Android compatibility
-      const loadPromise = AsyncStorage.getItem("gameState");
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('AsyncStorage timeout')), 5000)
-      );
-      
-      const stored = await Promise.race([loadPromise, timeoutPromise]) as string | null;
+      // Improved Android compatibility with better error handling
+      let stored: string | null = null;
+      try {
+        // Use a more conservative timeout for Android
+        const loadPromise = AsyncStorage.getItem("gameState");
+        const timeoutPromise = new Promise<string | null>((_, reject) => 
+          setTimeout(() => reject(new Error('AsyncStorage timeout')), 3000)
+        );
+        
+        stored = await Promise.race([loadPromise, timeoutPromise]);
+      } catch {
+        console.log('AsyncStorage timeout, trying direct access...');
+        try {
+          stored = await AsyncStorage.getItem("gameState");
+        } catch (directError) {
+          console.log('Direct AsyncStorage access failed:', directError);
+          stored = null;
+        }
+      }
       
       if (stored) {
         const parsedState = JSON.parse(stored);
@@ -48,12 +60,10 @@ export const [GameProvider, useGame] = createContextHook(() => {
             parsedState.backgroundGradient && 
             Array.isArray(parsedState.backgroundGradient) &&
             parsedState.backgroundGradient.length >= 2) {
-          // Ensure background gradient uses the new lighter yellow
+          // Ensure background gradient uses the sun-like yellow
           const updatedState = {
             ...parsedState,
-            backgroundGradient: parsedState.backgroundGradient[1] === '#FFEB3B' 
-              ? ["#1B5E20", "#FFF59D"] as const
-              : parsedState.backgroundGradient
+            backgroundGradient: ["#1B5E20", "#FFEB3B"] as const
           };
           setGameState(updatedState);
         } else {
