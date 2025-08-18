@@ -15,7 +15,7 @@ const defaultState: GameState = {
   categoryStars: {},
   totalAttempts: 0,
   correctAnswers: 0,
-  backgroundGradient: ["#1B5E20", "#5D4037"] as const,
+  backgroundGradient: ["#1B5E20", "#FFEB3B"] as const,
 };
 
 export const [GameProvider, useGame] = createContextHook(() => {
