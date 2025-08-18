@@ -1,0 +1,161 @@
+const animalImageMap: Record<string, string> = {
+  // Domaće životinje
+  cow: "https://images.unsplash.com/photo-1564410267841-915d8e4d71ea?w=400&h=400&fit=crop",
+  dog: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop",
+  cat: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
+  horse: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=400&fit=crop",
+  pig: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400&h=400&fit=crop",
+  sheep: "https://images.unsplash.com/photo-1484557985045-edf25e08da73?w=400&h=400&fit=crop",
+  goat: "https://images.unsplash.com/photo-1524024973431-2ad916746881?w=400&h=400&fit=crop",
+  chicken: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400&h=400&fit=crop",
+  duck: "https://images.unsplash.com/photo-1459682687441-7761439a709d?w=400&h=400&fit=crop",
+  goose: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  
+  // Divlje životinje
+  lion: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop",
+  tiger: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=400&h=400&fit=crop",
+  elephant: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400&h=400&fit=crop",
+  giraffe: "https://images.unsplash.com/photo-1547721064-da6cfb341d50?w=400&h=400&fit=crop",
+  zebra: "https://images.unsplash.com/photo-1501706362039-c06b2d715385?w=400&h=400&fit=crop",
+  bear: "https://images.unsplash.com/photo-1525382455947-f319bc05fb35?w=400&h=400&fit=crop",
+  wolf: "https://images.unsplash.com/photo-1568667256549-094345857637?w=400&h=400&fit=crop",
+  fox: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  deer: "https://images.unsplash.com/photo-1484406566174-9da000fda645?w=400&h=400&fit=crop",
+  rabbit: "https://images.unsplash.com/photo-1535241749838-299277b6305f?w=400&h=400&fit=crop",
+  
+  // Ptice
+  eagle: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=400&h=400&fit=crop",
+  owl: "https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?w=400&h=400&fit=crop",
+  parrot: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  pigeon: "https://images.unsplash.com/photo-1592487544149-fa8b017c345a?w=400&h=400&fit=crop",
+  sparrow: "https://images.unsplash.com/photo-1552874869-5c39ec9288dc?w=400&h=400&fit=crop",
+  swan: "https://images.unsplash.com/photo-1459682687441-7761439a709d?w=400&h=400&fit=crop",
+  flamingo: "https://images.unsplash.com/photo-1497206365907-f5e630693df0?w=400&h=400&fit=crop",
+  penguin: "https://images.unsplash.com/photo-1551986782-d0169b3f8fa7?w=400&h=400&fit=crop",
+  peacock: "https://images.unsplash.com/photo-1512990414788-d97cb4a25db3?w=400&h=400&fit=crop",
+  pelican: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=400&h=400&fit=crop",
+  
+  // Morske životinje
+  shark: "https://images.unsplash.com/photo-1560275619-4662e36fa65c?w=400&h=400&fit=crop",
+  dolphin: "https://images.unsplash.com/photo-1607153333879-c174d265f1d2?w=400&h=400&fit=crop",
+  whale: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=400&h=400&fit=crop",
+  octopus: "https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?w=400&h=400&fit=crop",
+  jellyfish: "https://images.unsplash.com/photo-1538681105587-85640961bf8b?w=400&h=400&fit=crop",
+  sea_turtle: "https://images.unsplash.com/photo-1591025207163-942350e47db2?w=400&h=400&fit=crop",
+  seahorse: "https://images.unsplash.com/photo-1535591273668-578e31182c4f?w=400&h=400&fit=crop",
+  crab: "https://images.unsplash.com/photo-1580019542155-247062e19ce4?w=400&h=400&fit=crop",
+  lobster: "https://images.unsplash.com/photo-1625406399868-864e2d60b875?w=400&h=400&fit=crop",
+  starfish: "https://images.unsplash.com/photo-1568145675395-66a2eda0c6d7?w=400&h=400&fit=crop",
+  
+  // Insekti
+  butterfly: "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=400&h=400&fit=crop",
+  bee: "https://images.unsplash.com/photo-1568526381923-caf3fd520382?w=400&h=400&fit=crop",
+  ant: "https://images.unsplash.com/photo-1525872782925-9bda09c2e0c2?w=400&h=400&fit=crop",
+  ladybug: "https://images.unsplash.com/photo-1533743409942-b91130480a7a?w=400&h=400&fit=crop",
+  spider: "https://images.unsplash.com/photo-1573547429441-d7ef62e04b63?w=400&h=400&fit=crop",
+  grasshopper: "https://images.unsplash.com/photo-1533048324814-79b0a31982f1?w=400&h=400&fit=crop",
+  dragonfly: "https://images.unsplash.com/photo-1535083252457-6080fe29be45?w=400&h=400&fit=crop",
+  fly: "https://images.unsplash.com/photo-1541971875076-8f970d573be6?w=400&h=400&fit=crop",
+  mosquito: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?w=400&h=400&fit=crop",
+  cricket: "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=400&h=400&fit=crop",
+  
+  // Additional animals for premium categories (using placeholder images)
+  monkey: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=400&fit=crop",
+  gorilla: "https://images.unsplash.com/photo-1555371363-27a37f8e8c46?w=400&h=400&fit=crop",
+  orangutan: "https://images.unsplash.com/photo-1514575110897-1253ff7b2ccb?w=400&h=400&fit=crop",
+  jaguar: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=400&h=400&fit=crop",
+  panther: "https://images.unsplash.com/photo-1456926631375-92c8ce872def?w=400&h=400&fit=crop",
+  sloth: "https://images.unsplash.com/photo-1509938175960-ac1d4970f0fa?w=400&h=400&fit=crop",
+  toucan: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  anaconda: "https://images.unsplash.com/photo-1531386151447-fd76ad50012f?w=400&h=400&fit=crop",
+  chameleon: "https://images.unsplash.com/photo-1580281780460-82d277b0e3f8?w=400&h=400&fit=crop",
+  tapir: "https://images.unsplash.com/photo-1598133893773-de3574464ef0?w=400&h=400&fit=crop",
+  
+  // Desert animals
+  camel: "https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=400&h=400&fit=crop",
+  scorpion: "https://images.unsplash.com/photo-1599420186946-7b6fb4e297f0?w=400&h=400&fit=crop",
+  snake: "https://images.unsplash.com/photo-1531386151447-fd76ad50012f?w=400&h=400&fit=crop",
+  lizard: "https://images.unsplash.com/photo-1504450874802-0ba2bcd9b5ae?w=400&h=400&fit=crop",
+  coyote: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  fennec_fox: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  meerkat: "https://images.unsplash.com/photo-1612538498613-35c5c8d675c4?w=400&h=400&fit=crop",
+  desert_eagle: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=400&h=400&fit=crop",
+  antelope: "https://images.unsplash.com/photo-1547970810-dc1eac37d174?w=400&h=400&fit=crop",
+  desert_tortoise: "https://images.unsplash.com/photo-1590691566903-692bf5ca7493?w=400&h=400&fit=crop",
+  
+  // Arctic animals
+  polar_bear: "https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=400&h=400&fit=crop",
+  seal: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=400&fit=crop",
+  walrus: "https://images.unsplash.com/photo-1581852017103-68ac65514cf7?w=400&h=400&fit=crop",
+  arctic_fox: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  reindeer: "https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=400&h=400&fit=crop",
+  snowy_owl: "https://images.unsplash.com/photo-1543549790-8b5f4a028cfb?w=400&h=400&fit=crop",
+  beluga: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=400&h=400&fit=crop",
+  narwhal: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?w=400&h=400&fit=crop",
+  arctic_hare: "https://images.unsplash.com/photo-1535241749838-299277b6305f?w=400&h=400&fit=crop",
+  lemming: "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=400&h=400&fit=crop",
+  
+  // Savanna animals
+  rhino: "https://images.unsplash.com/photo-1598894000396-bc30e0996899?w=400&h=400&fit=crop",
+  hippo: "https://images.unsplash.com/photo-1578326457399-3b34dbbf23b8?w=400&h=400&fit=crop",
+  cheetah: "https://images.unsplash.com/photo-1551969014-7d2c4cddf0b6?w=400&h=400&fit=crop",
+  hyena: "https://images.unsplash.com/photo-1551969014-7d2c4cddf0b6?w=400&h=400&fit=crop",
+  wildebeest: "https://images.unsplash.com/photo-1547970810-dc1eac37d174?w=400&h=400&fit=crop",
+  gazelle: "https://images.unsplash.com/photo-1547970810-dc1eac37d174?w=400&h=400&fit=crop",
+  buffalo: "https://images.unsplash.com/photo-1585095595205-e68428a9a3cc?w=400&h=400&fit=crop",
+  ostrich: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=400&h=400&fit=crop",
+  baboon: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=400&fit=crop",
+  porcupine: "https://images.unsplash.com/photo-1612538498613-35c5c8d675c4?w=400&h=400&fit=crop",
+  
+  // Australian animals
+  kangaroo: "https://images.unsplash.com/photo-1459262838948-3e2de6c1ec80?w=400&h=400&fit=crop",
+  koala: "https://images.unsplash.com/photo-1459262838948-3e2de6c1ec80?w=400&h=400&fit=crop",
+  wombat: "https://images.unsplash.com/photo-1584468790878-0a49a5cb3dd0?w=400&h=400&fit=crop",
+  tasmanian_devil: "https://images.unsplash.com/photo-1584468790878-0a49a5cb3dd0?w=400&h=400&fit=crop",
+  dingo: "https://images.unsplash.com/photo-1568667256549-094345857637?w=400&h=400&fit=crop",
+  emu: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=400&h=400&fit=crop",
+  platypus: "https://images.unsplash.com/photo-1584468790878-0a49a5cb3dd0?w=400&h=400&fit=crop",
+  echidna: "https://images.unsplash.com/photo-1584468790878-0a49a5cb3dd0?w=400&h=400&fit=crop",
+  cockatoo: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  crocodile: "https://images.unsplash.com/photo-1578662996442-48f60103fc31?w=400&h=400&fit=crop",
+  
+  // Mountain animals
+  mountain_eagle: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=400&h=400&fit=crop",
+  ibex: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+  puma: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  yak: "https://images.unsplash.com/photo-1585095595205-e68428a9a3cc?w=400&h=400&fit=crop",
+  llama: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop",
+  alpaca: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&h=400&fit=crop",
+  snow_leopard: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=400&h=400&fit=crop",
+  marmot: "https://images.unsplash.com/photo-1612538498613-35c5c8d675c4?w=400&h=400&fit=crop",
+  mountain_lion: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  condor: "https://images.unsplash.com/photo-1611689342806-0863700ce1e4?w=400&h=400&fit=crop",
+  
+  // Rainforest animals
+  jaguar2: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=400&h=400&fit=crop",
+  ocelot: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=400&fit=crop",
+  boa: "https://images.unsplash.com/photo-1531386151447-fd76ad50012f?w=400&h=400&fit=crop",
+  iguana: "https://images.unsplash.com/photo-1504450874802-0ba2bcd9b5ae?w=400&h=400&fit=crop",
+  frog: "https://images.unsplash.com/photo-1551915049-7d35e5e8b0dc?w=400&h=400&fit=crop",
+  hummingbird: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  macaw: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=400&fit=crop",
+  anteater: "https://images.unsplash.com/photo-1612538498613-35c5c8d675c4?w=400&h=400&fit=crop",
+  okapi: "https://images.unsplash.com/photo-1547721064-da6cfb341d50?w=400&h=400&fit=crop",
+  lemur: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=400&fit=crop",
+  
+  // Dinosaurs (using artistic/illustration style images)
+  t_rex: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  triceratops: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  stegosaurus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  velociraptor: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  brontosaurus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  pteranodon: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  spinosaurus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  diplodocus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  ankylosaurus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+  brachiosaurus: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=400&h=400&fit=crop",
+};
+
+export function getAnimalImage(key: string): string {
+  return animalImageMap[key] || "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=400&fit=crop";
+}
