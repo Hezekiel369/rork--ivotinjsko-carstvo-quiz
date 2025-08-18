@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { ChartBar, Settings, Lock } from "lucide-react-native";
+import { ChartBar, Settings, Lock, Star } from "lucide-react-native";
 import { useGame } from "@/contexts/GameContext";
 import { categories } from "@/data/categories";
 import { getAnimalImage, initializeAudio } from "@/utils/animalImages";
@@ -38,6 +38,7 @@ export default function HomeScreen() {
     }
     
     if (categoryId > 5 && categoryId <= 13) {
+      handlePremiumPress();
       return;
     }
     
@@ -45,6 +46,13 @@ export default function HomeScreen() {
       pathname: "/quiz",
       params: { categoryId: categoryId.toString() }
     });
+  };
+
+  const handlePremiumPress = async () => {
+    if (Platform.OS !== "web") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    console.log('Premium upgrade requested');
   };
 
   const renderCategoryCard = (category: typeof categories[0], index: number) => {
@@ -90,7 +98,18 @@ export default function HomeScreen() {
           </View>
           {isLocked && (
             <View style={styles.lockOverlay}>
-              <Lock size={40} color="#FFF" />
+              {isPremium ? (
+                <TouchableOpacity 
+                  style={styles.premiumButton}
+                  onPress={handlePremiumPress}
+                  activeOpacity={0.8}
+                >
+                  <Star size={16} color="#FFD700" fill="#FFD700" />
+                  <Text style={styles.premiumButtonText}>PREMIJUM</Text>
+                </TouchableOpacity>
+              ) : (
+                <Lock size={40} color="#FFF" />
+              )}
             </View>
           )}
           <View style={styles.cardInfo}>
@@ -124,6 +143,18 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>ŽIVOTINJSKO</Text>
           <Text style={styles.title}>CARSTVO</Text>
+        </View>
+
+        <View style={styles.premiumMessage}>
+          <Text style={styles.premiumMessageText}>IGRAJTE SVE NIVOE ZA SAMO 1 EVRO</Text>
+          <TouchableOpacity 
+            style={styles.mainPremiumButton}
+            onPress={handlePremiumPress}
+            activeOpacity={0.8}
+          >
+            <Star size={20} color="#FFD700" fill="#FFD700" />
+            <Text style={styles.mainPremiumButtonText}>PREMIJUM</Text>
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -293,5 +324,49 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600",
+  },
+  premiumMessage: {
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  premiumMessageText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFF",
+    textShadowColor: "#000",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  mainPremiumButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+  },
+  mainPremiumButtonText: {
+    color: "#FFD700",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  premiumButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    gap: 4,
+  },
+  premiumButtonText: {
+    color: "#FFD700",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });

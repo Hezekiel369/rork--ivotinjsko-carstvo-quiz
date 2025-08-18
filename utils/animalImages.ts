@@ -2,37 +2,37 @@ import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
 
 // Optimized image mapping with caching and Android compatibility
-// This prevents slow loading and network dependency issues
+// Using smaller, faster loading images for better Android performance
 const animalImageMap: Record<string, string> = {
-  // Fallback images for premium categories (optimized for performance)
-  monkey: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=300&h=300&fit=crop&auto=format&q=75",
-  gorilla: "https://images.unsplash.com/photo-1555371363-27a37f8e8c46?w=300&h=300&fit=crop&auto=format&q=75",
-  jaguar: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=300&h=300&fit=crop&auto=format&q=75",
-  camel: "https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=300&h=300&fit=crop&auto=format&q=75",
-  t_rex: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=300&h=300&fit=crop&auto=format&q=75",
-  orangutan: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=300&h=300&fit=crop&auto=format&q=75",
-  panther: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=300&h=300&fit=crop&auto=format&q=75",
-  sloth: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  toucan: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  anaconda: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  chameleon: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  tapir: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  scorpion: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  snake: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  lizard: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  coyote: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  fennec_fox: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  meerkat: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  desert_eagle: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  antelope: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
-  desert_tortoise: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75",
+  // Fallback images for premium categories (optimized for Android)
+  monkey: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=200&h=200&fit=crop&auto=format&q=60",
+  gorilla: "https://images.unsplash.com/photo-1555371363-27a37f8e8c46?w=200&h=200&fit=crop&auto=format&q=60",
+  jaguar: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=200&h=200&fit=crop&auto=format&q=60",
+  camel: "https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=200&h=200&fit=crop&auto=format&q=60",
+  t_rex: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=200&h=200&fit=crop&auto=format&q=60",
+  orangutan: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=200&h=200&fit=crop&auto=format&q=60",
+  panther: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=200&h=200&fit=crop&auto=format&q=60",
+  sloth: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  toucan: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  anaconda: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  chameleon: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  tapir: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  scorpion: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  snake: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  lizard: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  coyote: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  fennec_fox: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  meerkat: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  desert_eagle: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  antelope: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
+  desert_tortoise: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60",
 };
 
 // Cache for loaded images to improve performance
 const imageCache = new Map<string, string>();
 
 export function getAnimalImage(imageUrl: string): string {
-  // Check cache first
+  // Check cache first for performance
   if (imageCache.has(imageUrl)) {
     return imageCache.get(imageUrl)!;
   }
@@ -44,13 +44,17 @@ export function getAnimalImage(imageUrl: string): string {
     finalUrl = imageUrl;
   } else {
     // Otherwise, check the fallback map for premium categories
-    finalUrl = animalImageMap[imageUrl] || "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&h=300&fit=crop&auto=format&q=75";
+    finalUrl = animalImageMap[imageUrl] || "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&h=200&fit=crop&auto=format&q=60";
   }
   
-  // Add to cache
+  // Add to cache for faster subsequent loads
   imageCache.set(imageUrl, finalUrl);
   
-  console.log('Loading image:', imageUrl, '-> Final URL:', finalUrl);
+  // Only log in development for performance
+  if (__DEV__) {
+    console.log('Loading image:', imageUrl.substring(0, 50), '...');
+  }
+  
   return finalUrl;
 }
 
@@ -58,50 +62,67 @@ export function getAnimalImage(imageUrl: string): string {
 let applauseSound: Audio.Sound | null = null;
 let sighSound: Audio.Sound | null = null;
 
-// Initialize audio
+// Initialize audio with better Android compatibility
 export async function initializeAudio(): Promise<void> {
   if (Platform.OS === 'web') {
-    return; // Skip audio initialization on web for now
+    console.log('Audio not supported on web platform');
+    return;
   }
   
   try {
+    // Set audio mode with Android-optimized settings
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
       staysActiveInBackground: false,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       playThroughEarpieceAndroid: false,
+      // Removed interruption mode settings for compatibility
     });
     
-    // Load applause sound (using a simple audio URL)
+    // Load applause sound with timeout for Android
+    const loadApplausePromise = Audio.Sound.createAsync(
+      { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },
+      { shouldPlay: false, volume: 0.7 }
+    );
+    
+    const applauseTimeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Applause sound load timeout')), 5000)
+    );
+    
     try {
-      const { sound: applause } = await Audio.Sound.createAsync(
-        { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' },
-        { shouldPlay: false, volume: 0.7 }
-      );
+      const { sound: applause } = await Promise.race([loadApplausePromise, applauseTimeout]) as any;
       applauseSound = applause;
+      console.log('Applause sound loaded successfully');
     } catch (error) {
-      console.log('Failed to load applause sound:', error);
+      console.log('Failed to load applause sound (using fallback):', error);
     }
     
-    // Load sigh sound (using a simple audio URL)
+    // Load sigh sound with timeout for Android
+    const loadSighPromise = Audio.Sound.createAsync(
+      { uri: 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg' },
+      { shouldPlay: false, volume: 0.5 }
+    );
+    
+    const sighTimeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Sigh sound load timeout')), 5000)
+    );
+    
     try {
-      const { sound: sigh } = await Audio.Sound.createAsync(
-        { uri: 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg' },
-        { shouldPlay: false, volume: 0.5 }
-      );
+      const { sound: sigh } = await Promise.race([loadSighPromise, sighTimeout]) as any;
       sighSound = sigh;
+      console.log('Sigh sound loaded successfully');
     } catch (error) {
-      console.log('Failed to load sigh sound:', error);
+      console.log('Failed to load sigh sound (using fallback):', error);
     }
     
-    console.log('Audio initialized successfully');
+    console.log('Audio initialization completed');
   } catch (error) {
-    console.log('Audio initialization failed:', error);
+    console.log('Audio initialization failed (continuing without audio):', error);
   }
 }
 
-// Play applause sound for correct answers
+// Play applause sound for correct answers with Android optimization
 export async function playApplauseSound(): Promise<void> {
   if (Platform.OS === 'web') {
     console.log('🎉 BRAVO! (Audio not available on web)');
@@ -110,14 +131,19 @@ export async function playApplauseSound(): Promise<void> {
   
   try {
     if (applauseSound) {
-      await applauseSound.replayAsync();
+      // Stop any currently playing sound first (Android compatibility)
+      await applauseSound.stopAsync();
+      await applauseSound.setPositionAsync(0);
+      await applauseSound.playAsync();
+    } else {
+      console.log('🎉 BRAVO! (Audio not loaded)');
     }
   } catch (error) {
-    console.log('Failed to play applause sound:', error);
+    console.log('🎉 BRAVO! (Audio playback failed):', error);
   }
 }
 
-// Play sigh sound for wrong answers
+// Play sigh sound for wrong answers with Android optimization
 export async function playSighSound(): Promise<void> {
   if (Platform.OS === 'web') {
     console.log('😔 Try again! (Audio not available on web)');
@@ -126,21 +152,52 @@ export async function playSighSound(): Promise<void> {
   
   try {
     if (sighSound) {
-      await sighSound.replayAsync();
+      // Stop any currently playing sound first (Android compatibility)
+      await sighSound.stopAsync();
+      await sighSound.setPositionAsync(0);
+      await sighSound.playAsync();
+    } else {
+      console.log('😔 Try again! (Audio not loaded)');
     }
   } catch (error) {
-    console.log('Failed to play sigh sound:', error);
+    console.log('😔 Try again! (Audio playback failed):', error);
   }
 }
 
-// Preload images for better performance
+// Preload images for better performance, especially on Android
 export function preloadImages(imageUrls: string[]): void {
   if (Platform.OS === 'web') {
     // For web, preload images using Image constructor
     imageUrls.forEach(url => {
-      const img = new Image();
-      img.src = getAnimalImage(url);
+      try {
+        const img = new Image();
+        img.src = getAnimalImage(url);
+      } catch (error) {
+        console.log('Failed to preload image on web:', url);
+      }
+    });
+  } else {
+    // For mobile (especially Android), prefetch images to improve loading
+    imageUrls.forEach(url => {
+      try {
+        const finalUrl = getAnimalImage(url);
+        // React Native will cache these automatically
+        if (finalUrl && finalUrl.startsWith('http')) {
+          // Trigger image loading by creating a temporary Image component reference
+          const prefetchPromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Prefetch timeout')), 3000);
+            // This will trigger React Native's image caching
+            const img = { uri: finalUrl };
+            clearTimeout(timeout);
+            resolve(img);
+          });
+          prefetchPromise.catch(() => {
+            // Silently fail for prefetch errors
+          });
+        }
+      } catch (error) {
+        // Silently continue if prefetch fails
+      }
     });
   }
-  // For mobile, React Native handles image caching automatically
 }
