@@ -71,28 +71,17 @@ export function getAnimalImage(imageUrl: string): string {
 let applauseSound: Audio.Sound | null = null;
 let sighSound: Audio.Sound | null = null;
 
-// Initialize audio with better Android compatibility
+// Initialize audio with simple approach
 export async function initializeAudio(): Promise<void> {
   if (Platform.OS === 'web') {
     console.log('Audio not supported on web platform');
     return;
   }
   
-  const isAndroid = Platform.OS === ('android' as any);
-  
   try {
     console.log('Initializing audio for platform:', Platform.OS);
     
-    // For Android, completely skip audio to avoid remote update conflicts
-    if (isAndroid) {
-      console.log('Android detected - audio completely disabled for stability');
-      applauseSound = null;
-      sighSound = null;
-      console.log('Audio initialization skipped for Android');
-      return;
-    }
-    
-    // Set audio mode only for non-Android platforms
+    // Set audio mode
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -106,22 +95,16 @@ export async function initializeAudio(): Promise<void> {
       console.log('Audio mode setup failed (continuing):', audioModeError);
     }
     
-    // Non-Android platforms can use audio
+    // Load sounds
     const applauseSoundUri = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
     const sighSoundUri = 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg';
     
     // Load applause sound
     try {
-      const loadApplausePromise = Audio.Sound.createAsync(
+      const { sound: applause } = await Audio.Sound.createAsync(
         { uri: applauseSoundUri },
         { shouldPlay: false, volume: 0.6, isLooping: false }
       );
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Applause sound load timeout')), 3000)
-      );
-      
-      const { sound: applause } = await Promise.race([loadApplausePromise, timeoutPromise]) as any;
       applauseSound = applause;
       console.log('Applause sound loaded successfully');
     } catch (error) {
@@ -131,16 +114,10 @@ export async function initializeAudio(): Promise<void> {
     
     // Load sigh sound
     try {
-      const loadSighPromise = Audio.Sound.createAsync(
+      const { sound: sigh } = await Audio.Sound.createAsync(
         { uri: sighSoundUri },
         { shouldPlay: false, volume: 0.4, isLooping: false }
       );
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sigh sound load timeout')), 3000)
-      );
-      
-      const { sound: sigh } = await Promise.race([loadSighPromise, timeoutPromise]) as any;
       sighSound = sigh;
       console.log('Sigh sound loaded successfully');
     } catch (error) {
@@ -148,7 +125,7 @@ export async function initializeAudio(): Promise<void> {
       sighSound = null;
     }
     
-    console.log('Audio initialization completed for', Platform.OS);
+    console.log('Audio initialization completed');
   } catch (error) {
     console.log('Audio initialization failed (continuing without audio):', error);
     applauseSound = null;
@@ -156,18 +133,15 @@ export async function initializeAudio(): Promise<void> {
   }
 }
 
-// Play applause sound for correct answers with Android optimization
+// Play applause sound for correct answers
 export async function playApplauseSound(): Promise<void> {
-  const isAndroid = Platform.OS === ('android' as any);
-  
-  if (Platform.OS === 'web' || isAndroid) {
-    console.log('🎉 BRAVO! (Audio disabled for platform compatibility)');
+  if (Platform.OS === 'web') {
+    console.log('🎉 BRAVO! (Audio not supported on web)');
     return;
   }
   
   try {
     if (applauseSound) {
-      // Stop any currently playing sound first
       await applauseSound.stopAsync();
       await applauseSound.setPositionAsync(0);
       await applauseSound.playAsync();
@@ -179,18 +153,15 @@ export async function playApplauseSound(): Promise<void> {
   }
 }
 
-// Play sigh sound for wrong answers with Android optimization
+// Play sigh sound for wrong answers
 export async function playSighSound(): Promise<void> {
-  const isAndroid = Platform.OS === ('android' as any);
-  
-  if (Platform.OS === 'web' || isAndroid) {
-    console.log('😔 Try again! (Audio disabled for platform compatibility)');
+  if (Platform.OS === 'web') {
+    console.log('😔 Try again! (Audio not supported on web)');
     return;
   }
   
   try {
     if (sighSound) {
-      // Stop any currently playing sound first
       await sighSound.stopAsync();
       await sighSound.setPositionAsync(0);
       await sighSound.playAsync();

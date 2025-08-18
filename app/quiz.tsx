@@ -169,7 +169,11 @@ export default function QuizScreen() {
     console.log('Answer selected:', answerIndex, 'Correct index:', questions[currentQuestion]?.correctIndex);
     
     if (Platform.OS !== "web") {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      try {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch (hapticsError) {
+        console.log('Haptics failed:', hapticsError);
+      }
     }
     
     setSelectedAnswer(answerIndex);

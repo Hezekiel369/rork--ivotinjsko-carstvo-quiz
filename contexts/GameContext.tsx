@@ -31,60 +31,31 @@ export const [GameProvider, useGame] = createContextHook(() => {
     try {
       console.log('Loading game state for platform:', Platform.OS);
       
-      // Simplified Android approach to avoid remote update conflicts
-      let stored: string | null = null;
-      const isAndroid = Platform.OS === ('android' as any);
-      
-      if (isAndroid) {
-        // For Android, use very simple approach to avoid conflicts with remote updates
-        try {
-          console.log('Android - attempting simple AsyncStorage access');
-          stored = await AsyncStorage.getItem("gameState");
-          console.log('Android AsyncStorage access completed');
-        } catch (androidError) {
-          console.log('Android AsyncStorage failed, using default state:', androidError);
-          stored = null;
-        }
-      } else {
-        // Non-Android platforms (iOS, web) - with timeout
-        try {
-          const loadPromise = AsyncStorage.getItem("gameState");
-          const timeoutPromise = new Promise<string | null>((_, reject) => 
-            setTimeout(() => reject(new Error('AsyncStorage timeout')), 3000)
-          );
-          
-          stored = await Promise.race([loadPromise, timeoutPromise]);
-        } catch (nonAndroidError) {
-          console.log('Non-Android AsyncStorage failed:', nonAndroidError);
-          stored = null;
-        }
-      }
+      // Simple AsyncStorage access for all platforms
+      const stored = await AsyncStorage.getItem("gameState");
       
       if (stored) {
         try {
           const parsedState = JSON.parse(stored);
-          console.log('Successfully loaded and parsed game state:', parsedState);
+          console.log('Successfully loaded and parsed game state');
           
-          // Validate the loaded state structure with more thorough checks
+          // Validate the loaded state structure
           if (parsedState && 
               typeof parsedState === 'object' &&
               typeof parsedState.unlockedCategories === 'number' &&
-              parsedState.unlockedCategories >= 1 &&
-              parsedState.backgroundGradient && 
-              Array.isArray(parsedState.backgroundGradient) &&
-              parsedState.backgroundGradient.length >= 2) {
+              parsedState.unlockedCategories >= 1) {
             
             // Ensure background gradient uses the sun-like yellow
             const updatedState = {
-              ...defaultState, // Start with defaults
-              ...parsedState, // Override with stored values
-              backgroundGradient: ["#1B5E20", "#FFEB3B"] as const // Force correct gradient
+              ...defaultState,
+              ...parsedState,
+              backgroundGradient: ["#1B5E20", "#FFEB3B"] as const
             };
             
             console.log('Using validated stored state');
             setGameState(updatedState);
           } else {
-            console.log('Invalid stored state structure, using default. Stored:', parsedState);
+            console.log('Invalid stored state structure, using default');
             setGameState(defaultState);
           }
         } catch (parseError) {
@@ -96,7 +67,7 @@ export const [GameProvider, useGame] = createContextHook(() => {
         setGameState(defaultState);
       }
     } catch (error) {
-      console.error("Critical error loading game state:", error);
+      console.error("Error loading game state:", error);
       setGameState(defaultState);
     } finally {
       console.log('Game state loading completed');
@@ -106,8 +77,7 @@ export const [GameProvider, useGame] = createContextHook(() => {
 
   const saveGameState = async (newState: GameState) => {
     try {
-      console.log('Saving game state for platform:', Platform.OS);
-      const isAndroid = Platform.OS === ('android' as any);
+      console.log('Saving game state');
       
       // Validate state before saving
       if (!newState || typeof newState !== 'object') {
@@ -117,38 +87,21 @@ export const [GameProvider, useGame] = createContextHook(() => {
       
       const stateToSave = {
         ...newState,
-        backgroundGradient: ["#1B5E20", "#FFEB3B"] as const // Ensure correct gradient
+        backgroundGradient: ["#1B5E20", "#FFEB3B"] as const
       };
       
       // Update local state first for immediate UI response
       setGameState(stateToSave);
       
-      if (isAndroid) {
-        // For Android, use fire-and-forget approach to avoid blocking UI
-        AsyncStorage.setItem("gameState", JSON.stringify(stateToSave))
-          .then(() => {
-            console.log('Android save completed successfully');
-          })
-          .catch((saveError) => {
-            console.log('Android save failed (UI already updated):', saveError);
-          });
-      } else {
-        // Non-Android platforms - still use await but with timeout
-        try {
-          const savePromise = AsyncStorage.setItem("gameState", JSON.stringify(stateToSave));
-          const timeoutPromise = new Promise<void>((_, reject) => 
-            setTimeout(() => reject(new Error('Save timeout')), 2000)
-          );
-          
-          await Promise.race([savePromise, timeoutPromise]);
-          console.log('Non-Android save completed successfully');
-        } catch (saveError) {
-          console.log('Non-Android save failed (UI already updated):', saveError);
-        }
+      // Save to AsyncStorage
+      try {
+        await AsyncStorage.setItem("gameState", JSON.stringify(stateToSave));
+        console.log('Save completed successfully');
+      } catch (saveError) {
+        console.log('Save failed (UI already updated):', saveError);
       }
     } catch (error) {
-      console.error("Critical error saving game state:", error);
-      // Still update local state for UI consistency
+      console.error("Error saving game state:", error);
       setGameState(newState);
     }
   };

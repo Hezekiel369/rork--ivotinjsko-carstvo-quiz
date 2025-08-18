@@ -54,9 +54,7 @@ export default function HomeScreen() {
   }
 
   const handleCategoryPress = async (categoryId: number) => {
-    const isAndroid = Platform.OS === ('android' as any);
-    
-    if (Platform.OS !== "web" && !isAndroid) {
+    if (Platform.OS !== "web") {
       try {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (hapticsError) {
@@ -80,9 +78,7 @@ export default function HomeScreen() {
   };
 
   const handlePremiumPress = async () => {
-    const isAndroid = Platform.OS === ('android' as any);
-    
-    if (Platform.OS !== "web" && !isAndroid) {
+    if (Platform.OS !== "web") {
       try {
         await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       } catch (hapticsError) {
