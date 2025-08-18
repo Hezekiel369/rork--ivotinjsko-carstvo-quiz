@@ -41,87 +41,126 @@ export default function QuizScreen() {
       return;
     }
     
-    console.log('Generating questions for category:', category.name, 'with', category.animals.length, 'animals');
+    console.log(`Generating questions for category: ${category.name} (Platform: ${Platform.OS})`);
+    console.log(`Available animals: ${category.animals.length}`);
     
-    if (category.animals.length < 4) {
-      console.error('Category has less than 4 animals, cannot generate proper quiz');
-      return;
-    }
-    
-    // Ensure we have enough animals for proper quiz generation
-    const availableAnimals = [...category.animals];
-    
-    // Validate all animals have valid images
-    const validAnimals = availableAnimals.filter(animal => {
-      return animal.image && animal.image.length > 0;
+    // Validate all animals have valid images and names
+    const validAnimals = category.animals.filter(animal => {
+      const isValid = animal && 
+                     animal.id && 
+                     animal.name && 
+                     animal.image && 
+                     typeof animal.name === 'string' && 
+                     typeof animal.image === 'string' &&
+                     animal.name.length > 0 && 
+                     animal.image.length > 0;
+      
+      if (!isValid && __DEV__) {
+        console.log('Invalid animal filtered out:', animal);
+      }
+      return isValid;
     });
     
+    console.log(`Valid animals after filtering: ${validAnimals.length}`);
+    
     if (validAnimals.length < 4) {
-      console.error('Not enough valid animals with images:', validAnimals.length);
+      console.error(`Not enough valid animals (${validAnimals.length}/4 required). Cannot generate quiz.`);
+      // Set empty questions to show error state
+      setQuestions([]);
       return;
     }
     
-    const shuffled = validAnimals.sort(() => Math.random() - 0.5);
-    const questionList = shuffled.slice(0, Math.min(10, validAnimals.length)).map((correctAnimal, questionIndex) => {
-      // Get wrong answers, ensuring we always have exactly 3
-      const wrongAnswers = validAnimals
-        .filter(a => a.id !== correctAnimal.id)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
+    // Create a pool of animals for question generation
+    const animalPool = [...validAnimals];
+    
+    // Generate exactly 10 questions (or as many as possible)
+    const questionCount = Math.min(10, validAnimals.length);
+    const questionList: any[] = [];
+    
+    for (let i = 0; i < questionCount; i++) {
+      // Select correct animal (ensure we don't repeat too often)
+      const correctAnimal = animalPool[i % animalPool.length];
       
-      // Safety check: ensure we have exactly 3 wrong answers
-      while (wrongAnswers.length < 3 && validAnimals.length > 1) {
-        const randomAnimal = validAnimals[Math.floor(Math.random() * validAnimals.length)];
-        if (randomAnimal.id !== correctAnimal.id && !wrongAnswers.find(a => a.id === randomAnimal.id)) {
-          wrongAnswers.push(randomAnimal);
-        }
-        // Prevent infinite loop
-        if (wrongAnswers.length >= validAnimals.length - 1) break;
+      // Get 3 different wrong answers
+      const wrongAnswers: any[] = [];
+      const otherAnimals = validAnimals.filter(a => a.id !== correctAnimal.id);
+      
+      // Shuffle other animals and take first 3
+      const shuffledOthers = [...otherAnimals].sort(() => Math.random() - 0.5);
+      
+      for (let j = 0; j < 3 && j < shuffledOthers.length; j++) {
+        wrongAnswers.push(shuffledOthers[j]);
       }
       
-      // Ensure we have exactly 4 answers
-      if (wrongAnswers.length < 3) {
-        console.warn(`Question ${questionIndex + 1}: Only ${wrongAnswers.length + 1} answers available`);
-        // Duplicate some animals if necessary to ensure 4 answers
-        while (wrongAnswers.length < 3) {
-          const duplicateAnimal = validAnimals[wrongAnswers.length % validAnimals.length];
-          if (duplicateAnimal.id !== correctAnimal.id) {
-            wrongAnswers.push(duplicateAnimal);
-          }
+      // If we don't have enough different animals, duplicate some
+      while (wrongAnswers.length < 3) {
+        const fallbackAnimal = otherAnimals[wrongAnswers.length % otherAnimals.length];
+        if (fallbackAnimal && !wrongAnswers.find(a => a.id === fallbackAnimal.id)) {
+          wrongAnswers.push(fallbackAnimal);
+        } else {
+          // Create a modified version to ensure we have 4 unique options
+          const modifiedAnimal = {
+            ...fallbackAnimal,
+            id: fallbackAnimal.id + 1000 + wrongAnswers.length, // Unique ID
+            name: fallbackAnimal.name // Same name is OK for display
+          };
+          wrongAnswers.push(modifiedAnimal);
         }
       }
       
       // Create exactly 4 answers: 1 correct + 3 wrong
       const allAnswers = [correctAnimal, ...wrongAnswers.slice(0, 3)];
       
-      // Shuffle the answers so correct answer isn't always first
-      const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5);
+      // Shuffle the answers so correct answer position varies
+      const shuffledAnswers = [...allAnswers].sort(() => Math.random() - 0.5);
       
-      // Find the correct answer's new position after shuffling
+      // Find the correct answer's position after shuffling
       const correctIndex = shuffledAnswers.findIndex(a => a.id === correctAnimal.id);
       
-      // Validate we have exactly 4 answers
+      // Validate question structure
       if (shuffledAnswers.length !== 4) {
-        console.error(`Question ${questionIndex + 1}: Expected 4 answers, got ${shuffledAnswers.length}`);
+        console.error(`Question ${i + 1}: Invalid answer count: ${shuffledAnswers.length}`);
+        continue;
       }
       
-      if (__DEV__) {
-        console.log(`Question ${questionIndex + 1}: ${correctAnimal.name} at position ${correctIndex}, answers:`, shuffledAnswers.map(a => a.name));
+      if (correctIndex === -1) {
+        console.error(`Question ${i + 1}: Correct answer not found in shuffled answers`);
+        continue;
       }
       
-      return {
+      const question = {
         correctAnimal,
         answers: shuffledAnswers,
         correctIndex
       };
-    });
+      
+      questionList.push(question);
+      
+      if (__DEV__) {
+        console.log(`Q${i + 1}: ${correctAnimal.name} at pos ${correctIndex}`);
+        console.log(`  Answers: ${shuffledAnswers.map(a => a.name).join(', ')}`);
+      }
+    }
+    
+    if (questionList.length === 0) {
+      console.error('Failed to generate any valid questions');
+      setQuestions([]);
+      return;
+    }
     
     // Preload all images for better performance (especially Android)
-    const allImages = questionList.flatMap(q => q.answers.map(a => a.image));
-    preloadImages(allImages);
+    try {
+      const allImages = questionList.flatMap(q => 
+        q.answers.map((a: any) => a.image).filter((img: string) => img && img.length > 0)
+      );
+      console.log(`Preloading ${allImages.length} images for Android optimization`);
+      preloadImages(allImages);
+    } catch (preloadError) {
+      console.log('Image preloading failed (continuing):', preloadError);
+    }
     
     setQuestions(questionList);
-    console.log('Generated', questionList.length, 'questions with 4 answers each.');
+    console.log(`Successfully generated ${questionList.length} questions with 4 answers each`);
   }, [category]);
 
   useEffect(() => {
@@ -200,7 +239,41 @@ export default function QuizScreen() {
     return (
       <LinearGradient colors={backgroundGradient} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <Text style={styles.loadingText}>Učitavanje...</Text>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+              testID="back-button"
+            >
+              <ArrowLeft size={24} color="#FFF" />
+            </TouchableOpacity>
+            <Text style={styles.categoryName}>{category?.name || 'Quiz'}</Text>
+            <View style={styles.progress} />
+          </View>
+          
+          <View style={styles.errorContainer}>
+            <Text style={styles.loadingText}>Učitavanje pitanja...</Text>
+            <Text style={styles.errorSubText}>Platform: {Platform.OS}</Text>
+            <Text style={styles.errorSubText}>
+              Kategorija: {category?.name} ({category?.animals?.length || 0} životinja)
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.retryButton}
+              onPress={() => {
+                console.log('Manual retry from loading state');
+                if (category) {
+                  generateQuestions();
+                } else {
+                  router.back();
+                }
+              }}
+            >
+              <Text style={styles.retryButtonText}>
+                {category ? 'Pokušaj ponovo' : 'Nazad'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </LinearGradient>
     );
@@ -232,48 +305,61 @@ export default function QuizScreen() {
           </View>
 
           <View style={styles.answersGrid}>
-            {question.answers && question.answers.length === 4 ? (
+            {question.answers && Array.isArray(question.answers) && question.answers.length === 4 ? (
               <>
                 {/* First row - Top 2 answers */}
                 <View style={styles.answerRow}>
-                  {question.answers.slice(0, 2).map((animal: any, index: number) => (
-                    <TouchableOpacity
-                      key={`${animal.id}-${currentQuestion}-${index}`}
-                      style={[
-                        styles.answerCard,
-                        selectedAnswer === index && styles.selectedCard,
-                        showFeedback && index === question.correctIndex && styles.correctCard,
-                        showFeedback && selectedAnswer === index && !isCorrect && styles.wrongCard,
-                      ]}
-                      onPress={() => handleAnswer(index)}
-                      disabled={showFeedback}
-                      testID={`answer-${index}`}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.imageWrapper}>
-                        <Image
-                          source={{ uri: getAnimalImage(animal.image) }}
-                          style={styles.answerImage}
-                          resizeMode="cover"
-                          onError={(error) => {
-                            if (__DEV__) {
-                              console.log('Image load error for', animal.name, ':', error.nativeEvent?.error);
-                            }
-                          }}
-                          onLoad={() => {
-                            if (__DEV__) {
-                              console.log('Image loaded:', animal.name);
-                            }
-                          }}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  ))}
+                  {question.answers.slice(0, 2).map((animal: any, index: number) => {
+                    if (!animal || !animal.image) {
+                      console.warn(`Invalid animal at index ${index}:`, animal);
+                      return null;
+                    }
+                    
+                    return (
+                      <TouchableOpacity
+                        key={`${animal.id}-${currentQuestion}-${index}`}
+                        style={[
+                          styles.answerCard,
+                          selectedAnswer === index && styles.selectedCard,
+                          showFeedback && index === question.correctIndex && styles.correctCard,
+                          showFeedback && selectedAnswer === index && !isCorrect && styles.wrongCard,
+                        ]}
+                        onPress={() => handleAnswer(index)}
+                        disabled={showFeedback}
+                        testID={`answer-${index}`}
+                        activeOpacity={0.8}
+                      >
+                        <View style={styles.imageWrapper}>
+                          <Image
+                            source={{ uri: getAnimalImage(animal.image) }}
+                            style={styles.answerImage}
+                            resizeMode="cover"
+                            onError={(error) => {
+                              if (__DEV__) {
+                                console.log(`Image load error for ${animal.name} (${Platform.OS}):`, error.nativeEvent?.error);
+                              }
+                            }}
+                            onLoad={() => {
+                              if (__DEV__) {
+                                console.log(`Image loaded: ${animal.name} (${Platform.OS})`);
+                              }
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
                 {/* Second row - Bottom 2 answers */}
                 <View style={styles.answerRow}>
                   {question.answers.slice(2, 4).map((animal: any, index: number) => {
                     const actualIndex = index + 2;
+                    
+                    if (!animal || !animal.image) {
+                      console.warn(`Invalid animal at index ${actualIndex}:`, animal);
+                      return null;
+                    }
+                    
                     return (
                       <TouchableOpacity
                         key={`${animal.id}-${currentQuestion}-${actualIndex}`}
@@ -295,12 +381,12 @@ export default function QuizScreen() {
                             resizeMode="cover"
                             onError={(error) => {
                               if (__DEV__) {
-                                console.log('Image load error for', animal.name, ':', error.nativeEvent?.error);
+                                console.log(`Image load error for ${animal.name} (${Platform.OS}):`, error.nativeEvent?.error);
                               }
                             }}
                             onLoad={() => {
                               if (__DEV__) {
-                                console.log('Image loaded:', animal.name);
+                                console.log(`Image loaded: ${animal.name} (${Platform.OS})`);
                               }
                             }}
                           />
@@ -316,11 +402,20 @@ export default function QuizScreen() {
                   Greška u učitavanju pitanja
                 </Text>
                 <Text style={styles.errorSubText}>
+                  Platform: {Platform.OS}
+                </Text>
+                <Text style={styles.errorSubText}>
                   Očekivano: 4 odgovora, Pronađeno: {question.answers?.length || 0}
+                </Text>
+                <Text style={styles.errorSubText}>
+                  Kategorija: {category?.name} ({category?.animals?.length || 0} životinja)
                 </Text>
                 <TouchableOpacity 
                   style={styles.retryButton}
-                  onPress={() => generateQuestions()}
+                  onPress={() => {
+                    console.log('Retrying question generation...');
+                    generateQuestions();
+                  }}
                 >
                   <Text style={styles.retryButtonText}>Pokušaj ponovo</Text>
                 </TouchableOpacity>

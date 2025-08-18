@@ -4,14 +4,14 @@ import { Audio } from 'expo-av';
 // Optimized image mapping with caching and Android compatibility
 // Using smaller, faster loading images for better Android performance
 const animalImageMap: Record<string, string> = {
-  // Fallback images for premium categories (optimized for Android with smaller sizes)
-  monkey: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=150&h=150&fit=crop&auto=format&q=50",
-  gorilla: "https://images.unsplash.com/photo-1555371363-27a37f8e8c46?w=150&h=150&fit=crop&auto=format&q=50",
-  jaguar: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=150&h=150&fit=crop&auto=format&q=50",
-  camel: "https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=150&h=150&fit=crop&auto=format&q=50",
-  t_rex: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=150&h=150&fit=crop&auto=format&q=50",
-  // Simplified fallback for any missing images
-  fallback: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=150&h=150&fit=crop&auto=format&q=50",
+  // Fallback images for premium categories (optimized for Android with smaller sizes and better compression)
+  monkey: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=120&h=120&fit=crop&auto=format&q=40",
+  gorilla: "https://images.unsplash.com/photo-1555371363-27a37f8e8c46?w=120&h=120&fit=crop&auto=format&q=40",
+  jaguar: "https://images.unsplash.com/photo-1517825738774-7de9363ef735?w=120&h=120&fit=crop&auto=format&q=40",
+  camel: "https://images.unsplash.com/photo-1536431311719-398b6704d4cc?w=120&h=120&fit=crop&auto=format&q=40",
+  t_rex: "https://images.unsplash.com/photo-1606856110002-d0991ce78250?w=120&h=120&fit=crop&auto=format&q=40",
+  // Simplified fallback for any missing images (very small and fast)
+  fallback: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=100&h=100&fit=crop&auto=format&q=30",
 };
 
 // Cache for loaded images to improve performance
@@ -20,7 +20,9 @@ const imageCache = new Map<string, string>();
 export function getAnimalImage(imageUrl: string): string {
   // Input validation for Android compatibility
   if (!imageUrl || typeof imageUrl !== 'string') {
-    console.log('Invalid image URL provided, using fallback');
+    if (__DEV__) {
+      console.log('Invalid image URL provided, using fallback');
+    }
     return animalImageMap.fallback;
   }
   
@@ -30,11 +32,25 @@ export function getAnimalImage(imageUrl: string): string {
   }
   
   let finalUrl: string;
+  const isAndroid = Platform.OS === ('android' as any);
   
   try {
-    // If it's already a full URL (from categories.ts), return it directly
+    // If it's already a full URL (from categories.ts), optimize for Android
     if (imageUrl.startsWith('http')) {
-      finalUrl = imageUrl;
+      if (isAndroid) {
+        // For Android, modify URLs to use smaller, more compressed images
+        if (imageUrl.includes('unsplash.com')) {
+          // Reduce image size and quality for Android performance
+          finalUrl = imageUrl.replace(/w=\d+/, 'w=120').replace(/h=\d+/, 'h=120').replace(/q=\d+/, 'q=40');
+        } else if (imageUrl.includes('r2.dev')) {
+          // R2 images are already optimized, use as-is
+          finalUrl = imageUrl;
+        } else {
+          finalUrl = imageUrl;
+        }
+      } else {
+        finalUrl = imageUrl;
+      }
     } else {
       // Otherwise, check the fallback map for premium categories
       finalUrl = animalImageMap[imageUrl] || animalImageMap.fallback;
@@ -49,13 +65,15 @@ export function getAnimalImage(imageUrl: string): string {
     imageCache.set(imageUrl, finalUrl);
     
     // Only log in development for performance
-    if (__DEV__) {
-      console.log('Loading image:', imageUrl.substring(0, 30), '-> cached');
+    if (__DEV__ && !imageCache.has(imageUrl)) {
+      console.log(`Image processed (${Platform.OS}):`, imageUrl.substring(0, 30), '-> cached');
     }
     
     return finalUrl;
   } catch (error) {
-    console.log('Error processing image URL:', error);
+    if (__DEV__) {
+      console.log('Error processing image URL:', error);
+    }
     return animalImageMap.fallback;
   }
 }
@@ -71,32 +89,40 @@ export async function initializeAudio(): Promise<void> {
     return;
   }
   
+  const isAndroid = Platform.OS === ('android' as any);
+  
   try {
     console.log('Initializing audio for platform:', Platform.OS);
     
     // Set audio mode with Android-optimized settings
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      staysActiveInBackground: false,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
-    });
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: isAndroid,
+        playThroughEarpieceAndroid: false,
+      });
+      console.log('Audio mode set successfully');
+    } catch (audioModeError) {
+      console.log('Audio mode setup failed (continuing):', audioModeError);
+    }
     
-    console.log('Audio mode set successfully');
+    // For Android, use simpler approach - skip audio loading if it causes issues
+    if (isAndroid) {
+      console.log('Android detected - using simplified audio approach');
+      // Don't load audio files on Android to prevent crashes
+      applauseSound = null;
+      sighSound = null;
+      console.log('Audio initialization completed for Android (audio disabled for stability)');
+      return;
+    }
     
-    // Use simpler, more reliable sound URLs for Android
-    const applauseSoundUri = Platform.OS === 'android' 
-      ? 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav'
-      : 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
-      
-    const sighSoundUri = Platform.OS === 'android'
-      ? 'https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav'
-      : 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg';
+    // Non-Android platforms can use audio
+    const applauseSoundUri = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
+    const sighSoundUri = 'https://actions.google.com/sounds/v1/alarms/buzzer.ogg';
     
-    // Load applause sound with Android-specific timeout
-    const applauseTimeout = Platform.OS === 'android' ? 5000 : 3000;
-    
+    // Load applause sound
     try {
       const loadApplausePromise = Audio.Sound.createAsync(
         { uri: applauseSoundUri },
@@ -104,7 +130,7 @@ export async function initializeAudio(): Promise<void> {
       );
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Applause sound load timeout')), applauseTimeout)
+        setTimeout(() => reject(new Error('Applause sound load timeout')), 3000)
       );
       
       const { sound: applause } = await Promise.race([loadApplausePromise, timeoutPromise]) as any;
@@ -115,7 +141,7 @@ export async function initializeAudio(): Promise<void> {
       applauseSound = null;
     }
     
-    // Load sigh sound with Android-specific timeout
+    // Load sigh sound
     try {
       const loadSighPromise = Audio.Sound.createAsync(
         { uri: sighSoundUri },
@@ -123,7 +149,7 @@ export async function initializeAudio(): Promise<void> {
       );
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sigh sound load timeout')), applauseTimeout)
+        setTimeout(() => reject(new Error('Sigh sound load timeout')), 3000)
       );
       
       const { sound: sigh } = await Promise.race([loadSighPromise, timeoutPromise]) as any;
@@ -144,14 +170,16 @@ export async function initializeAudio(): Promise<void> {
 
 // Play applause sound for correct answers with Android optimization
 export async function playApplauseSound(): Promise<void> {
-  if (Platform.OS === 'web') {
-    console.log('🎉 BRAVO! (Audio not available on web)');
+  const isAndroid = Platform.OS === ('android' as any);
+  
+  if (Platform.OS === 'web' || isAndroid) {
+    console.log('🎉 BRAVO! (Audio disabled for platform compatibility)');
     return;
   }
   
   try {
     if (applauseSound) {
-      // Stop any currently playing sound first (Android compatibility)
+      // Stop any currently playing sound first
       await applauseSound.stopAsync();
       await applauseSound.setPositionAsync(0);
       await applauseSound.playAsync();
@@ -165,14 +193,16 @@ export async function playApplauseSound(): Promise<void> {
 
 // Play sigh sound for wrong answers with Android optimization
 export async function playSighSound(): Promise<void> {
-  if (Platform.OS === 'web') {
-    console.log('😔 Try again! (Audio not available on web)');
+  const isAndroid = Platform.OS === ('android' as any);
+  
+  if (Platform.OS === 'web' || isAndroid) {
+    console.log('😔 Try again! (Audio disabled for platform compatibility)');
     return;
   }
   
   try {
     if (sighSound) {
-      // Stop any currently playing sound first (Android compatibility)
+      // Stop any currently playing sound first
       await sighSound.stopAsync();
       await sighSound.setPositionAsync(0);
       await sighSound.playAsync();

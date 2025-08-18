@@ -29,8 +29,14 @@ export default function HomeScreen() {
   }, []);
 
   const handleCategoryPress = async (categoryId: number) => {
-    if (Platform.OS !== "web") {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const isAndroid = Platform.OS === ('android' as any);
+    
+    if (Platform.OS !== "web" && !isAndroid) {
+      try {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (hapticsError) {
+        console.log('Haptics failed:', hapticsError);
+      }
     }
     
     if (categoryId > unlockedCategories && categoryId <= 5) {
@@ -49,8 +55,14 @@ export default function HomeScreen() {
   };
 
   const handlePremiumPress = async () => {
-    if (Platform.OS !== "web") {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const isAndroid = Platform.OS === ('android' as any);
+    
+    if (Platform.OS !== "web" && !isAndroid) {
+      try {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch (hapticsError) {
+        console.log('Haptics failed:', hapticsError);
+      }
     }
     console.log('Premium upgrade requested');
   };
