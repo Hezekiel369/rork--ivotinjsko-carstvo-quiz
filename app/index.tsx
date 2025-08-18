@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -15,7 +15,7 @@ import { router } from "expo-router";
 import { ChartBar, Settings, Lock } from "lucide-react-native";
 import { useGame } from "@/contexts/GameContext";
 import { categories } from "@/data/categories";
-import { getAnimalImage } from "@/utils/animalImages";
+import { getAnimalImage, initializeAudio } from "@/utils/animalImages";
 import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
@@ -23,6 +23,10 @@ const cardWidth = (width - 48) / 2;
 
 export default function HomeScreen() {
   const { unlockedCategories, categoryStars, backgroundGradient } = useGame();
+  
+  useEffect(() => {
+    initializeAudio();
+  }, []);
 
   const handleCategoryPress = async (categoryId: number) => {
     if (Platform.OS !== "web") {
@@ -77,11 +81,13 @@ export default function HomeScreen() {
         testID={`category-${category.id}`}
       >
         <View style={styles.cardContent}>
-          <Image
-            source={{ uri: getAnimalImage(categoryAnimal.image) }}
-            style={styles.cardImage}
-            resizeMode="cover"
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: getAnimalImage(categoryAnimal.image) }}
+              style={styles.cardImage}
+              resizeMode="cover"
+            />
+          </View>
           {isLocked && (
             <View style={styles.lockOverlay}>
               <Lock size={40} color="#FFF" />
@@ -205,10 +211,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  cardImage: {
+  imageContainer: {
     width: "100%",
     height: "60%",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
+  },
+  cardImage: {
+    width: "85%",
+    height: "85%",
+    borderRadius: 1000,
     backgroundColor: "#4CAF50",
+    borderWidth: 3,
+    borderColor: "#FFF",
   },
   lockOverlay: {
     position: "absolute",

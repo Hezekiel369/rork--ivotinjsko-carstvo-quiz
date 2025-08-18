@@ -15,7 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useGame } from "@/contexts/GameContext";
 import { categories } from "@/data/categories";
-import { getAnimalImage, preloadImages } from "@/utils/animalImages";
+import { getAnimalImage, preloadImages, playApplauseSound, playSighSound } from "@/utils/animalImages";
 import * as Haptics from "expo-haptics";
 import ConfettiView from "@/components/ConfettiView";
 
@@ -49,17 +49,24 @@ export default function QuizScreen() {
     }
     
     const shuffled = [...category.animals].sort(() => Math.random() - 0.5);
-    const questionList = shuffled.slice(0, 10).map((correctAnimal, questionIndex) => {
+    const questionList = shuffled.slice(0, Math.min(10, category.animals.length)).map((correctAnimal, questionIndex) => {
       const wrongAnswers = category.animals
         .filter(a => a.id !== correctAnimal.id)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
       
       if (wrongAnswers.length < 3) {
-        console.error('Not enough wrong answers for question', questionIndex);
+        console.error('Not enough wrong answers for question', questionIndex, 'using available:', wrongAnswers.length);
+        // Fill with duplicates if needed (shouldn't happen with our data)
+        while (wrongAnswers.length < 3 && category.animals.length > 1) {
+          const randomAnimal = category.animals[Math.floor(Math.random() * category.animals.length)];
+          if (randomAnimal.id !== correctAnimal.id && !wrongAnswers.find(a => a.id === randomAnimal.id)) {
+            wrongAnswers.push(randomAnimal);
+          }
+        }
       }
       
-      const allAnswers = [correctAnimal, ...wrongAnswers].sort(() => Math.random() - 0.5);
+      const allAnswers = [correctAnimal, ...wrongAnswers.slice(0, 3)].sort(() => Math.random() - 0.5);
       
       console.log(`Question ${questionIndex + 1}: Correct answer is ${correctAnimal.name}, all answers:`, allAnswers.map(a => a.name));
       
@@ -75,7 +82,7 @@ export default function QuizScreen() {
     preloadImages(allImages);
     
     setQuestions(questionList);
-    console.log('Generated', questionList.length, 'questions. First question has', questionList[0]?.answers?.length, 'answers');
+    console.log('Generated', questionList.length, 'questions. All questions have 4 answers each.');
   }, [category]);
 
   useEffect(() => {
@@ -101,7 +108,10 @@ export default function QuizScreen() {
     if (correct) {
       setCorrectAnswers(prev => prev + 1);
       setShowConfetti(true);
+      playApplauseSound();
       setTimeout(() => setShowConfetti(false), 2500);
+    } else {
+      playSighSound();
     }
     
     Animated.timing(fadeAnim, {
@@ -200,13 +210,15 @@ export default function QuizScreen() {
                       disabled={showFeedback}
                       testID={`answer-${index}`}
                     >
-                      <Image
-                        source={{ uri: getAnimalImage(animal.image) }}
-                        style={styles.answerImage}
-                        resizeMode="cover"
-                        onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
-                        onLoad={() => console.log('Image loaded successfully:', animal.name)}
-                      />
+                      <View style={styles.imageWrapper}>
+                        <Image
+                          source={{ uri: getAnimalImage(animal.image) }}
+                          style={styles.answerImage}
+                          resizeMode="cover"
+                          onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
+                          onLoad={() => console.log('Image loaded successfully:', animal.name)}
+                        />
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -227,13 +239,15 @@ export default function QuizScreen() {
                         disabled={showFeedback}
                         testID={`answer-${actualIndex}`}
                       >
-                        <Image
-                          source={{ uri: getAnimalImage(animal.image) }}
-                          style={styles.answerImage}
-                          resizeMode="cover"
-                          onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
-                          onLoad={() => console.log('Image loaded successfully:', animal.name)}
-                        />
+                        <View style={styles.imageWrapper}>
+                          <Image
+                            source={{ uri: getAnimalImage(animal.image) }}
+                            style={styles.answerImage}
+                            resizeMode="cover"
+                            onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
+                            onLoad={() => console.log('Image loaded successfully:', animal.name)}
+                          />
+                        </View>
                       </TouchableOpacity>
                     );
                   })}
@@ -367,11 +381,18 @@ const styles = StyleSheet.create({
     borderColor: "#F44336",
     borderWidth: 4,
   },
-  answerImage: {
+  imageWrapper: {
     width: "85%",
     height: "85%",
     borderRadius: 1000,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#FFF",
     backgroundColor: "#4CAF50",
+  },
+  answerImage: {
+    width: "100%",
+    height: "100%",
   },
   feedbackContainer: {
     position: "absolute",
