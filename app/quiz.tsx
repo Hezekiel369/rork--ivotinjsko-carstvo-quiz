@@ -178,12 +178,17 @@ export default function QuizScreen() {
                 { opacity: fadeAnim }
               ]}
             >
-              <Text style={[
-                styles.feedbackText,
-                isCorrect ? styles.correctText : styles.wrongText
+              <View style={[
+                styles.feedbackBackground,
+                isCorrect ? styles.correctBackground : styles.wrongBackground
               ]}>
-                {isCorrect ? "BRAVO!!!" : "POKUŠAJTE PONOVO"}
-              </Text>
+                <Text style={[
+                  styles.feedbackText,
+                  isCorrect ? styles.correctText : styles.wrongText
+                ]}>
+                  {isCorrect ? "BRAVO!!!" : "POKUŠAJTE PONOVO"}
+                </Text>
+              </View>
             </Animated.View>
           )}
         </View>
@@ -294,6 +299,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: "center",
+  },
+  feedbackBackground: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  correctBackground: {
+    backgroundColor: "#4CAF50",
+  },
+  wrongBackground: {
+    backgroundColor: "#FFF",
   },
   feedbackText: {
     fontSize: 36,

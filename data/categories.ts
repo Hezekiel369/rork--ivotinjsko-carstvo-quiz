@@ -15,7 +15,7 @@ export const categories: Category[] = [
   {
     id: 1,
     name: "Domaće životinje",
-    emoji: "🐄",
+    emoji: "🐴",
     animals: [
       { id: 1, name: "BIK", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/3jx1cctvmw5gqk5sumyej" },
       { id: 2, name: "GUSKA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/tx4x44pylzo3i3oy693w1" },
@@ -38,7 +38,7 @@ export const categories: Category[] = [
   {
     id: 2,
     name: "Divlje životinje",
-    emoji: "🦁",
+    emoji: "🐅",
     animals: [
       { id: 17, name: "ANTILOPA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/hl9bh56ouxxuwre6cskug" },
       { id: 18, name: "DIVLJA SVINJA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/oa15zor5tm5eprmrs4ils" },
@@ -64,7 +64,7 @@ export const categories: Category[] = [
   {
     id: 3,
     name: "Ptice",
-    emoji: "🦜",
+    emoji: "🦅",
     animals: [
       { id: 36, name: "BELOGLAVI SUP", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/bmn0usrn75q8v4yabafe1" },
       { id: 37, name: "ČAPLJA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/3toyb32au6c6l5tv5xr9f" },
@@ -88,7 +88,7 @@ export const categories: Category[] = [
   {
     id: 4,
     name: "Morske životinje",
-    emoji: "🐠",
+    emoji: "🐋",
     animals: [
       { id: 31, name: "AJKULA", image: "shark" },
       { id: 32, name: "DELFIN", image: "dolphin" },
@@ -107,16 +107,19 @@ export const categories: Category[] = [
     name: "Insekti",
     emoji: "🐞",
     animals: [
-      { id: 41, name: "LEPTIR", image: "butterfly" },
-      { id: 42, name: "PČELA", image: "bee" },
-      { id: 43, name: "MRAV", image: "ant" },
-      { id: 44, name: "BUBAMARA", image: "ladybug" },
-      { id: 45, name: "PAUK", image: "spider" },
-      { id: 46, name: "SKAKAVAC", image: "grasshopper" },
-      { id: 47, name: "VILIN KONJIC", image: "dragonfly" },
-      { id: 48, name: "MUVA", image: "fly" },
-      { id: 49, name: "KOMARAC", image: "mosquito" },
-      { id: 50, name: "CVRČAK", image: "cricket" },
+      { id: 53, name: "BOGOMOLJKA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/tgmhl71vvgohvfii6taun" },
+      { id: 54, name: "BUBAMARA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/g4lcvlybvydldibk5l9ua" },
+      { id: 55, name: "GLISTA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/j14ybazvklj5cemnyqgja" },
+      { id: 56, name: "GUSENICA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qelc12trlnfzu7ncuezqw" },
+      { id: 57, name: "KOMARAC", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/bkbzghjamsnzwhkd8gphc" },
+      { id: 58, name: "LEPTIR", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qmxp42uj3828zkxo0giqn" },
+      { id: 59, name: "MRAV", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/2pta28r1l947t1lixw5or" },
+      { id: 60, name: "MUHA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/eka5fe1fqui6g1qdk9lq9" },
+      { id: 61, name: "OSA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/8cx91g0kwzkuyjxv8pyix" },
+      { id: 62, name: "PČELA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/rn0zjz221x9cavh4s8cv6" },
+      { id: 63, name: "SKAKAVAC", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/chfcn0ocftgpicpdkgjfv" },
+      { id: 64, name: "STONOGA", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/z1dv0ucy0bpl1gww7f3ot" },
+      { id: 65, name: "STRŠLJEN", image: "https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/m3gj5lsnllce6144thi8e" },
     ],
   },
   {

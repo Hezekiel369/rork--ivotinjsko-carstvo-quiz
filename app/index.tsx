@@ -48,7 +48,25 @@ export default function HomeScreen() {
     const isPremium = index >= 5;
     const isLocked = !isUnlocked || (isPremium && index < 13);
     const stars = categoryStars[category.id] || 0;
-    const randomAnimal = category.animals[Math.floor(Math.random() * Math.min(3, category.animals.length))];
+    
+    // Use specific animals for each category as requested
+    let categoryAnimal;
+    switch (category.id) {
+      case 1: // Domaće životinje - use horse (KONJ)
+        categoryAnimal = category.animals.find(a => a.name === "KONJ") || category.animals[0];
+        break;
+      case 2: // Divlje životinje - use tiger (TIGAR)
+        categoryAnimal = category.animals.find(a => a.name === "TIGAR") || category.animals[0];
+        break;
+      case 3: // Ptice - use eagle (ORAO)
+        categoryAnimal = category.animals.find(a => a.name === "ORAO") || category.animals[0];
+        break;
+      case 4: // Morske životinje - use whale (KIT)
+        categoryAnimal = category.animals.find(a => a.name === "KIT") || category.animals[0];
+        break;
+      default:
+        categoryAnimal = category.animals[0];
+    }
 
     return (
       <TouchableOpacity
@@ -60,7 +78,7 @@ export default function HomeScreen() {
       >
         <View style={styles.cardContent}>
           <Image
-            source={{ uri: getAnimalImage(randomAnimal.image) }}
+            source={{ uri: getAnimalImage(categoryAnimal.image) }}
             style={styles.cardImage}
             resizeMode="cover"
           />

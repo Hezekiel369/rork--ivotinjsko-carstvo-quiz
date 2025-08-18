@@ -59,7 +59,7 @@ export const [GameProvider, useGame] = createContextHook(() => {
       },
       totalAttempts: gameState.totalAttempts + 10,
       correctAnswers: gameState.correctAnswers + correctCount,
-      unlockedCategories: stars > 0 
+      unlockedCategories: stars === 3 
         ? Math.max(gameState.unlockedCategories, Math.min(categoryId + 1, 5))
         : gameState.unlockedCategories,
     };
