@@ -1,7 +1,9 @@
 name: Android Build
 
 on:
-  workflow_dispatch: # Ovo omogućava ručno pokretanje!
+  workflow_dispatch:
+  push: # Dodajte ovu liniju
+    branches: [main]
 
 jobs:
   build:
