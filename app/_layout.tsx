@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
@@ -12,20 +11,6 @@ try {
 } catch (error) {
   console.log('SplashScreen preventAutoHideAsync failed:', error);
 }
-
-// Simple QueryClient configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
 
 function RootLayoutNav() {
   return (
@@ -65,12 +50,10 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <GameProvider>
-          <RootLayoutNav />
-        </GameProvider>
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GameProvider>
+        <RootLayoutNav />
+      </GameProvider>
+    </GestureHandlerRootView>
   );
 }
